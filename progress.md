@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:15 Asia/Shanghai
-**Active Feature:** Adapter contract test matrix complete
+**Last Updated:** 2026-05-11 19:26 Asia/Shanghai
+**Active Feature:** All tracked requirements complete
 
 ## Status
 
@@ -55,17 +55,22 @@
 - [x] Added K-line contract cases for `candlesticks`, `list`, `items`, ISO dates, and numeric timestamp strings.
 - [x] Added holdings contract cases for live positions without market fields, fixture-style market fields, and camelCase payloads.
 - [x] Added rejection tests for missing quote price, K-line timestamp, and holding cost basis.
+- [x] Implemented `feat-009` Longbridge SDK/API provider using the official `longbridge` Node.js SDK.
+- [x] Added `--data-provider sdk` and `--longbridge-region` CLI options.
+- [x] SDK provider supports API key env auth and OAuth token-cache discovery from `~/.longbridge/openapi/tokens`.
+- [x] SDK provider reads quotes/K-lines through `QuoteContext` and positions through `TradeContext`, behind `TradeLivingDataProvider`.
+- [x] Implemented `feat-011` AI JSON Output Contract with documentation and executable Zod schemas.
+- [x] Added JSON contract tests for analyze/report and portfolio outputs.
 
 ### What's In Progress
 
-Nothing in progress. The adapter contract test matrix is done and validated.
+Nothing in progress. All tracked features in `feature_list.json` are done and validated.
 
 ### What's Next
 
-1. Implement `feat-009` Longbridge SDK/API provider behind the provider contracts.
-2. Implement `feat-011` AI JSON output contract documentation and tests.
-3. Add bearish/range/volatile fixture test suites.
-4. Extend the visual Markdown template to portfolio reports.
+1. Add bearish/range/volatile fixture test suites.
+2. Extend the visual Markdown template to portfolio reports.
+3. Investigate richer option quote support through SDK `optionQuote`.
 
 ## Blockers / Risks
 
@@ -85,6 +90,8 @@ Nothing in progress. The adapter contract test matrix is done and validated.
 - **Provider contract first:** CLI and services depend on Trade Living provider interfaces. Longbridge CLI is now one provider implementation, not the command layer's direct dependency.
 - **Markdown as AI interpretation template:** Analysis Markdown should be structured, skimmable, and visually prioritized for AI/user consumption while JSON remains the stable machine contract.
 - **Adapter contract tests before new providers:** External payload variants are now locked with fixture-driven schema tests before adding SDK/API data sources.
+- **SDK provider is selectable, not default:** `--live` still defaults to Longbridge CLI. Use `--data-provider sdk` to exercise the official Node.js SDK path.
+- **AI JSON is the machine contract:** `docs/AI_JSON_CONTRACT.md` and `src/report/ai-json-contract.ts` define stable JSON shapes; Markdown remains a presentation template.
 
 ## Files Modified This Session (2026-05-11 afternoon)
 
@@ -118,6 +125,18 @@ Nothing in progress. The adapter contract test matrix is done and validated.
 - `feature_list.json` - Completed `feat-010` Adapter Contract Test Matrix.
 - `test/longbridge-contracts.test.ts` - Added fixture-driven contract tests for Longbridge quote, K-line, and holdings payload normalization plus rejection cases.
 
+## Files Modified This Session (2026-05-11 completion)
+
+- `package.json`, `package-lock.json` - Added official `longbridge` SDK dependency.
+- `src/adapters/longbridge-sdk.adapter.ts` - Implemented SDK-backed quote, K-line, holdings, and enriched holdings provider.
+- `src/adapters/data-provider.factory.ts` - Added `sdk` provider selection.
+- `src/cli.ts` - Added `--data-provider` and `--longbridge-region` options.
+- `src/report/ai-json-contract.ts` - Added executable Zod schemas for AI JSON outputs.
+- `docs/AI_JSON_CONTRACT.md` - Documented stable AI-facing JSON contract.
+- `docs/LONGBRIDGE_INTEGRATION_PLAN.md` - Updated SDK provider usage and auth notes.
+- `test/longbridge-sdk.adapter.test.ts` - Added SDK provider unit coverage with fake contexts.
+- `test/ai-json-contract.test.ts` - Added JSON contract validation coverage.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -141,7 +160,11 @@ Nothing in progress. The adapter contract test matrix is done and validated.
 - [x] Data provider abstraction: `npm run check`, `npm test` (7 files / 21 tests), `npm run build`, and `./init.sh` passed on 2026-05-11.
 - [x] Markdown interpretation template: `npm run dev -- report AMZN.US --markdown` produced structured template output; `./init.sh` passed with 8 test files / 22 tests on 2026-05-11.
 - [x] Adapter contract test matrix: `npm run check`, `npm test` (9 files / 34 tests), `npm run build`, and `./init.sh` passed on 2026-05-11.
+- [x] SDK provider: `npm run dev -- --data-provider sdk --longbridge-region cn --start 2026-01-01 analyze NVDA.US --json` passed against real Longbridge SDK/OAuth environment.
+- [x] SDK portfolio: `npm run dev -- --data-provider sdk --longbridge-region cn portfolio --json` passed, returning 24 holdings and risk summary.
+- [x] Real environment check: `longbridge check` passed with token OK, active CN region, CN endpoint 22ms, global endpoint timeout.
+- [x] AI JSON contract: `npm test` passed with 11 files / 41 tests after contract tests were added.
 
 ## Notes for Next Session
 
-All original 7 planned features plus `feat-008`, `feat-010`, and `feat-012` are complete. Live Longbridge integration remains behind a provider interface. Markdown analysis reports are now structured for AI-facing interpretation. Longbridge payload normalization is covered by contract tests. Continue with `feat-009` if adding SDK/API access, or `feat-011` if stabilizing AI-facing JSON output first. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis reports are structured for AI-facing interpretation, and JSON outputs have documented/tested contracts. Do not implement automatic trading.

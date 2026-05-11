@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { pathToFileURL } from "node:url";
-import { createDataProvider } from "./adapters/data-provider.factory.js";
+import { createDataProvider, type DataProviderKind } from "./adapters/data-provider.factory.js";
 import type { TradeLivingDataProvider } from "./adapters/data-provider.js";
 import type { KLine } from "./domain/types.js";
 import { calculateForceIndex } from "./indicators/force-index.indicator.js";
@@ -22,6 +22,8 @@ type OutputOptions = {
   debug?: boolean;
   live?: boolean;
   longbridgeCli?: string;
+  dataProvider?: DataProviderKind;
+  longbridgeRegion?: "cn" | "global";
   start?: string;
 };
 
@@ -41,7 +43,9 @@ function asRows(value: unknown): Record<string, unknown> {
 function getDataProvider(options: OutputOptions): TradeLivingDataProvider {
   return createDataProvider({
     live: options.live,
-    longbridgeCli: options.longbridgeCli
+    longbridgeCli: options.longbridgeCli,
+    provider: options.dataProvider,
+    longbridgeRegion: options.longbridgeRegion
   });
 }
 
@@ -68,7 +72,9 @@ export function createProgram(): Command {
     .option("--pretty", "output human-readable text")
     .option("--debug", "include debug details")
     .option("--live", "read market and portfolio data from Longbridge CLI")
+    .option("--data-provider <provider>", "data provider: offline, cli, or sdk")
     .option("--longbridge-cli <path>", "Longbridge CLI executable path", "longbridge")
+    .option("--longbridge-region <region>", "Longbridge region for SDK provider: global or cn")
     .option("--start <date>", "history start date for live K-line data", "2024-01-01");
 
   program

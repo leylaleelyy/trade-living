@@ -4,19 +4,42 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 9 test files / 34 tests pass, build succeeds).
-4. Open `feature_list.json` — original 7 features plus `feat-008`, `feat-010`, and `feat-012` are done.
+3. Run `./init.sh` (expects: 11 test files / 41 tests pass, build succeeds).
+4. Open `feature_list.json` — all tracked features are done.
 5. Check this file and `progress.md` for context.
 
 ## Current State
 
-**All original planned features are complete and validated against live Longbridge data. The provider abstraction, adapter contract matrix, and Markdown interpretation template are also complete.**
+**All tracked features are complete and validated.**
 
 The CLI supports 7 commands (`analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), all working in both offline (sample data) and live (`--live`) modes.
 
 Longbridge CLI is now behind `TradeLivingDataProvider`/`MarketDataProvider`/`PortfolioDataProvider` contracts, so command and service code no longer depends directly on Longbridge CLI implementation details.
 
 `report --markdown` and `analyze --markdown` now render structured AI-facing interpretation reports with highlighted conclusions, colored signal badges, icon markers, visual score bars, price ladder, risk warnings, and a trade-plan checklist.
+
+The official Longbridge Node.js SDK is available through `--data-provider sdk`. JSON output contracts are documented in `docs/AI_JSON_CONTRACT.md` and tested with executable Zod schemas.
+
+## What Was Done This Session (2026-05-11 completion)
+
+### SDK Provider And AI JSON Contract
+
+Completed the final two tracked requirements:
+
+1. **`feat-009` Longbridge SDK/API Provider** — Added official `longbridge` SDK dependency and implemented `LongbridgeSdkAdapter` behind `TradeLivingDataProvider`.
+2. **Provider selection** — Added `--data-provider <offline|cli|sdk>` and `--longbridge-region <global|cn>`.
+3. **SDK auth** — Supports API key env auth and OAuth token-cache discovery from `~/.longbridge/openapi/tokens`.
+4. **SDK data paths** — Uses `QuoteContext` for quotes/K-lines and `TradeContext` for positions.
+5. **`feat-011` AI JSON Output Contract** — Added `docs/AI_JSON_CONTRACT.md`, `src/report/ai-json-contract.ts`, and contract tests for analyze/report plus portfolio outputs.
+
+### Verification
+
+- `npm run check` — pass.
+- `npm test` — pass, 11 test files / 41 tests.
+- `npm run build` — pass.
+- `longbridge check` — token OK, active CN region, CN endpoint 22ms, global endpoint timeout.
+- `npm run dev -- --data-provider sdk --longbridge-region cn --start 2026-01-01 analyze NVDA.US --json` — pass.
+- `npm run dev -- --data-provider sdk --longbridge-region cn portfolio --json` — pass, 24 holdings and risk summary returned.
 
 ## What Was Done This Session (2026-05-11 adapter contracts)
 
@@ -60,9 +83,9 @@ Added the first prioritized optimization from the Longbridge CLI coupling discus
 
 1. **Requirement tracking** — Added `feat-008` through `feat-011` to `feature_list.json`.
    - `feat-008` Data Provider Abstraction — done.
-   - `feat-009` Longbridge SDK Or API Provider — todo.
-   - `feat-010` Adapter Contract Test Matrix — todo.
-   - `feat-011` AI JSON Output Contract — todo.
+   - `feat-009` Longbridge SDK Or API Provider — done.
+   - `feat-010` Adapter Contract Test Matrix — done.
+   - `feat-011` AI JSON Output Contract — done.
 
 2. **Stable provider contracts** — Added `src/adapters/data-provider.ts` with market, portfolio, enriched portfolio, and combined data provider interfaces.
 
@@ -130,7 +153,6 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 
 Priority order:
 
-1. **Longbridge SDK/API provider (`feat-009`)** — Add a non-CLI provider implementation behind the new provider contracts.
-2. **AI JSON output contract (`feat-011`)** — Document and test stable machine-consumable JSON for AI callers.
-3. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
-4. **Portfolio Markdown template** — Extend the visual template approach to `portfolio --markdown`.
+1. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
+2. **Portfolio Markdown template** — Extend the visual template approach to `portfolio --markdown`.
+3. **Option quote enrichment** — Investigate SDK `optionQuote` for LEAPS/options currently shown as cost-only.

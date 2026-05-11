@@ -43,14 +43,27 @@ trade-living --live portfolio
 trade-living --live report AAPL.US --markdown
 ```
 
-## SDK Later
+## SDK Provider
 
-The official Node.js SDK package is `longbridge`. It should be added later when the project needs WebSocket subscriptions, lower-level quote contexts, or richer account APIs. Keep the SDK behind the existing adapter boundary.
+The official Node.js SDK package is `longbridge`. It is available through the same provider boundary as the CLI adapter:
+
+```bash
+trade-living --data-provider sdk --longbridge-region cn analyze AAPL.US --start 2026-01-01 --json
+trade-living --data-provider sdk --longbridge-region cn portfolio --json
+```
+
+Authentication order:
+
+1. Legacy SDK API key environment variables: `LONGBRIDGE_APP_KEY`, `LONGBRIDGE_APP_SECRET`, `LONGBRIDGE_ACCESS_TOKEN`.
+2. OAuth token cache discovery from `~/.longbridge/openapi/tokens/<client_id>`.
+
+The SDK provider uses `QuoteContext` for quotes/K-lines and `TradeContext` for positions. Longbridge CLI remains the default `--live` provider and fallback data source.
 
 ## Done Criteria
 
 - Adapter uses official Longbridge Terminal command names.
 - Schemas parse official quote-style JSON fixtures.
 - CLI supports `--live`, `--longbridge-cli`, and `--start`.
+- CLI supports `--data-provider sdk` for the official Node.js SDK.
 - Offline mode remains deterministic and testable.
 - `npm run check`, `npm test`, and `npm run build` pass.

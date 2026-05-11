@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDataProvider } from "../src/adapters/data-provider.factory.js";
 import { LongbridgeCliAdapter } from "../src/adapters/longbridge-cli.adapter.js";
+import { LongbridgeSdkAdapter } from "../src/adapters/longbridge-sdk.adapter.js";
 import { OfflineDataProvider } from "../src/adapters/offline-data.adapter.js";
 
 describe("data provider factory", () => {
@@ -29,5 +30,14 @@ describe("data provider factory", () => {
 
     expect(provider).toBeInstanceOf(LongbridgeCliAdapter);
   });
-});
 
+  it("uses Longbridge SDK when requested", () => {
+    const provider = createDataProvider({
+      live: true,
+      provider: "sdk",
+      longbridgeRegion: "cn"
+    });
+
+    expect(provider).toBeInstanceOf(LongbridgeSdkAdapter);
+  });
+});

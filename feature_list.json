@@ -69,8 +69,8 @@
       "name": "Longbridge SDK Or API Provider",
       "description": "Add a Longbridge SDK/API-backed provider implementation behind the same provider contracts, leaving Longbridge CLI as a fallback data source.",
       "dependencies": ["feat-008"],
-      "status": "todo",
-      "evidence": ""
+      "status": "done",
+      "evidence": "Installed official longbridge Node.js SDK and implemented LongbridgeSdkAdapter behind TradeLivingDataProvider. Added --data-provider sdk and --longbridge-region options, API key env support, and OAuth token cache discovery. Verification on 2026-05-11: SDK analyze NVDA.US and SDK portfolio passed against real CN Longbridge environment."
     },
     {
       "id": "feat-010",
@@ -85,8 +85,8 @@
       "name": "AI JSON Output Contract",
       "description": "Document and test the stable JSON response shape intended for AI callers, including backward-compatible field evolution rules.",
       "dependencies": ["feat-007", "feat-008"],
-      "status": "todo",
-      "evidence": ""
+      "status": "done",
+      "evidence": "Added docs/AI_JSON_CONTRACT.md and executable Zod schemas for analyze/report and portfolio JSON outputs. Verification on 2026-05-11: contract tests passed and ./init.sh passed with 11 test files / 41 tests."
     },
     {
       "id": "feat-012",

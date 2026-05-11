@@ -1,10 +1,10 @@
-import type { LongbridgeCliAdapter } from "../adapters/longbridge-cli.adapter.js";
+import type { MarketDataProvider } from "../adapters/data-provider.js";
 import type { Quote } from "../domain/types.js";
 
 export class QuoteService {
-  constructor(private readonly longbridge: LongbridgeCliAdapter) {}
+  constructor(private readonly marketData: MarketDataProvider) {}
 
   getQuote(symbol: string): Promise<Quote> {
-    return this.longbridge.getQuote(symbol);
+    return this.marketData.getQuote(symbol);
   }
 }

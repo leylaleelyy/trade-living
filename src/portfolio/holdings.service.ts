@@ -1,10 +1,10 @@
-import type { LongbridgeCliAdapter } from "../adapters/longbridge-cli.adapter.js";
+import type { PortfolioDataProvider } from "../adapters/data-provider.js";
 import type { Holding } from "../domain/types.js";
 
 export class HoldingsService {
-  constructor(private readonly longbridge: LongbridgeCliAdapter) {}
+  constructor(private readonly portfolioData: PortfolioDataProvider) {}
 
   getHoldings(): Promise<Holding[]> {
-    return this.longbridge.getHoldings();
+    return this.portfolioData.getHoldings();
   }
 }

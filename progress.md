@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 17:54 Asia/Shanghai
-**Active Feature:** Longbridge live environment validated and bug-fixed
+**Last Updated:** 2026-05-11 19:01 Asia/Shanghai
+**Active Feature:** Data provider abstraction complete
 
 ## Status
 
@@ -42,17 +42,23 @@
 - [x] Updated `Holding` type: added optional `name` and `currency` fields from Longbridge response.
 - [x] Updated `calculatePortfolioRisk` and `summarizeHoldings` to handle optional market fields gracefully.
 - [x] Full live environment test: all 6 CLI commands pass with real Longbridge data.
+- [x] Added prioritized decoupling requirements to `feature_list.json`: provider abstraction, SDK/API provider, adapter contract tests, and AI JSON output contract.
+- [x] Implemented `TradeLivingDataProvider`, `MarketDataProvider`, and `PortfolioDataProvider` contracts.
+- [x] Added offline and Longbridge provider implementations behind `createDataProvider()`.
+- [x] Updated CLI, quote service, kline service, and holdings service to depend on provider interfaces instead of `LongbridgeCliAdapter`.
+- [x] Added provider factory tests.
 
 ### What's In Progress
 
-Nothing in progress. All planned features are done and validated.
+Nothing in progress. The first decoupling feature is done and validated.
 
 ### What's Next
 
-1. Improve Markdown report formatting from compact JSON into reader-friendly sections.
-2. Add bearish/range/volatile fixture test suites.
-3. Consider batching quote requests if Longbridge adds a multi-symbol endpoint.
-4. Add option pricing support (currently options show cost only).
+1. Implement `feat-009` Longbridge SDK/API provider behind the provider contracts.
+2. Implement `feat-010` adapter contract test matrix for external payload normalization.
+3. Implement `feat-011` AI JSON output contract documentation and tests.
+4. Improve Markdown report formatting from compact JSON into reader-friendly sections.
+5. Add bearish/range/volatile fixture test suites.
 
 ## Blockers / Risks
 
@@ -69,6 +75,7 @@ Nothing in progress. All planned features are done and validated.
 - **Sequential quote enrichment:** Holdings are enriched one-by-one to avoid API rate limiting (previously concurrent `Promise.all` caused random failures).
 - **Options skipped in enrichment:** Symbols matching `\d{6}[CP]\d+\.` are identified as options and skipped since the quote API returns empty arrays for them.
 - **Holding fields optional:** `marketPrice`, `marketValue`, `unrealizedPnl` are optional in the domain type; downstream consumers (portfolio risk, account summary) fall back to cost-based calculations.
+- **Provider contract first:** CLI and services depend on Trade Living provider interfaces. Longbridge CLI is now one provider implementation, not the command layer's direct dependency.
 
 ## Files Modified This Session (2026-05-11 afternoon)
 
@@ -78,6 +85,18 @@ Nothing in progress. All planned features are done and validated.
 - `src/cli.ts` - Portfolio command now calls `getEnrichedHoldings()` instead of `getHoldings()`.
 - `src/risk/portfolio-risk.service.ts` - Handles optional `marketValue`/`unrealizedPnl` with fallback calculations.
 - `src/portfolio/account.service.ts` - Handles optional `marketValue`/`unrealizedPnl` with fallback calculations.
+
+## Files Modified This Session (2026-05-11 evening)
+
+- `feature_list.json` - Added prioritized decoupling requirements and completed `feat-008`.
+- `src/adapters/data-provider.ts` - Added stable provider contracts.
+- `src/adapters/data-provider.factory.ts` - Added provider factory for offline vs Longbridge live mode.
+- `src/adapters/offline-data.adapter.ts` - Added offline provider implementation.
+- `src/adapters/longbridge-cli.adapter.ts` - Longbridge CLI adapter now implements `TradeLivingDataProvider`.
+- `src/market/sample-data.ts` - Moved reusable offline sample data out of setup orchestration.
+- `src/cli.ts` - Commands now request data through provider factory.
+- `src/market/quote.service.ts`, `src/market/kline.service.ts`, `src/portfolio/holdings.service.ts` - Services now depend on provider interfaces.
+- `test/data-provider.test.ts` - Added provider factory and offline provider coverage.
 
 ## Evidence of Completion
 
@@ -99,7 +118,8 @@ Nothing in progress. All planned features are done and validated.
 - [x] `--live triple AAPL.US` — bullish trend, neutral decision.
 - [x] `--live force AAPL.US` — Force Index EMA2/EMA13 values returned.
 - [x] `--live report AAPL.US` — full analysis report with trade plan.
+- [x] Data provider abstraction: `npm run check`, `npm test` (7 files / 21 tests), `npm run build`, and `./init.sh` passed on 2026-05-11.
 
 ## Notes for Next Session
 
-All 7 planned features are complete. Live Longbridge integration is validated and working. The main remaining improvements are cosmetic (Markdown report formatting) and coverage expansion (bearish/volatile fixture suites). Do not implement automatic trading.
+All original 7 planned features plus `feat-008` are complete. Live Longbridge integration remains behind a provider interface. Continue with `feat-009` if adding SDK/API access, or `feat-010` if hardening existing adapters first. Do not implement automatic trading.

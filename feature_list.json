@@ -55,6 +55,38 @@
       "dependencies": ["feat-004", "feat-005", "feat-006"],
       "status": "done",
       "evidence": "./init.sh passed on 2026-05-11. All 6 CLI commands validated against live Longbridge data. Fixed schema mismatch, rate limiting, and option symbol handling. 6 test files / 19 tests pass."
+    },
+    {
+      "id": "feat-008",
+      "name": "Data Provider Abstraction",
+      "description": "Define stable market and portfolio provider contracts so command and analysis code depend on Trade Living interfaces instead of Longbridge CLI details.",
+      "dependencies": ["feat-002", "feat-007"],
+      "status": "done",
+      "evidence": "Implemented provider contracts, offline provider, and provider factory. CLI, quote/kline/holdings services now depend on provider interfaces instead of LongbridgeCliAdapter. Verification on 2026-05-11: npm run check, npm test (7 files / 21 tests), npm run build, and ./init.sh passed."
+    },
+    {
+      "id": "feat-009",
+      "name": "Longbridge SDK Or API Provider",
+      "description": "Add a Longbridge SDK/API-backed provider implementation behind the same provider contracts, leaving Longbridge CLI as a fallback data source.",
+      "dependencies": ["feat-008"],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "feat-010",
+      "name": "Adapter Contract Test Matrix",
+      "description": "Add fixture-driven contract tests that lock external payload normalization into stable internal Quote, KLine, and Holding models.",
+      "dependencies": ["feat-008"],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "feat-011",
+      "name": "AI JSON Output Contract",
+      "description": "Document and test the stable JSON response shape intended for AI callers, including backward-compatible field evolution rules.",
+      "dependencies": ["feat-007", "feat-008"],
+      "status": "todo",
+      "evidence": ""
     }
   ]
 }

@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { pathToFileURL } from "node:url";
-import { LongbridgeCliAdapter } from "./adapters/longbridge-cli.adapter.js";
+import { createDataProvider } from "./adapters/data-provider.factory.js";
+import type { TradeLivingDataProvider } from "./adapters/data-provider.js";
 import type { KLine } from "./domain/types.js";
 import { calculateForceIndex } from "./indicators/force-index.indicator.js";
 import { latestFinite } from "./indicators/math.js";
 import { calculatePortfolioRisk } from "./risk/portfolio-risk.service.js";
 import { calculatePositionSize } from "./risk/position-sizing.service.js";
 import { calculateRiskReward, gradeRiskReward } from "./risk/rr-engine.service.js";
-import { analyzeKLines, createOfflineAnalysis, createSampleKLines } from "./systems/setup-engine.js";
+import { analyzeKLines } from "./systems/setup-engine.js";
 import { calculateMomentumScore } from "./systems/momentum-score.system.js";
 import { evaluateTripleScreen } from "./systems/triple-screen.system.js";
 import { toJsonReport } from "./report/json.reporter.js";
@@ -37,16 +38,15 @@ function asRows(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : { value };
 }
 
-function createLongbridgeAdapter(options: OutputOptions): LongbridgeCliAdapter {
-  return new LongbridgeCliAdapter(options.longbridgeCli ?? "longbridge");
+function getDataProvider(options: OutputOptions): TradeLivingDataProvider {
+  return createDataProvider({
+    live: options.live,
+    longbridgeCli: options.longbridgeCli
+  });
 }
 
 async function getDailyKLines(symbol: string, options: OutputOptions): Promise<KLine[]> {
-  if (!options.live) {
-    return createSampleKLines();
-  }
-
-  return createLongbridgeAdapter(options).getKLines(symbol, {
+  return getDataProvider(options).getKLines(symbol, {
     start: options.start,
     period: "day"
   });
@@ -76,18 +76,7 @@ export function createProgram(): Command {
     .description("Show portfolio exposure and risk summary")
     .action(async () => {
       const options = program.opts<OutputOptions>();
-      const holdings = options.live
-        ? await createLongbridgeAdapter(options).getEnrichedHoldings()
-        : [
-            {
-              symbol: "AAPL.US",
-              quantity: 10,
-              avgCost: 190,
-              marketPrice: 210,
-              marketValue: 2100,
-              unrealizedPnl: 200
-            }
-          ];
+      const holdings = await getDataProvider(options).getEnrichedHoldings();
       printResult(
         {
           holdings,
@@ -104,9 +93,7 @@ export function createProgram(): Command {
     .description("Run full Triple Screen, momentum, structure, divergence, and risk analysis")
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
-      const analysis = options.live
-        ? analyzeKLines(symbol, await getDailyKLines(symbol, options))
-        : createOfflineAnalysis(symbol);
+      const analysis = analyzeKLines(symbol, await getDailyKLines(symbol, options));
       printResult(analysis, options, `Analysis ${symbol}`);
     });
 
@@ -197,9 +184,7 @@ export function createProgram(): Command {
     .description("Generate analysis report")
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
-      const analysis = options.live
-        ? analyzeKLines(symbol, await getDailyKLines(symbol, options))
-        : createOfflineAnalysis(symbol);
+      const analysis = analyzeKLines(symbol, await getDailyKLines(symbol, options));
       printResult(
         analysis,
         { ...options, markdown: options.markdown || (!options.json && !options.pretty) },

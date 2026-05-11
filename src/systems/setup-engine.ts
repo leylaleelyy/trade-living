@@ -13,6 +13,7 @@ import { calculateMomentumScore } from "./momentum-score.system.js";
 import { calculateTradeQuality } from "./trade-quality.engine.js";
 import { evaluateTripleScreen } from "./triple-screen.system.js";
 import type { KLine } from "../domain/types.js";
+import { createSampleKLines } from "../market/sample-data.js";
 
 export function createOfflineAnalysis(symbol: string): AnalyzeResult {
   const dailyKLines = createSampleKLines();
@@ -96,18 +97,4 @@ function buildWarnings(
   return warnings;
 }
 
-export function createSampleKLines(): KLine[] {
-  return Array.from({ length: 60 }, (_, index) => {
-    const trend = 180 + index * 0.65;
-    const wave = Math.sin(index / 3) * 2;
-    const close = round(trend + wave);
-    return {
-      timestamp: Date.UTC(2026, 0, index + 1),
-      open: round(close - 0.8),
-      high: round(close + 1.6),
-      low: round(close - 1.9),
-      close,
-      volume: 900000 + index * 8000 + (index % 7) * 30000
-    };
-  });
-}
+export { createSampleKLines };

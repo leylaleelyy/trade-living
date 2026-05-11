@@ -1,13 +1,10 @@
-import type {
-  KLineRequest,
-  LongbridgeCliAdapter
-} from "../adapters/longbridge-cli.adapter.js";
+import type { KLineRequest, MarketDataProvider } from "../adapters/data-provider.js";
 import type { KLine } from "../domain/types.js";
 
 export class KLineService {
-  constructor(private readonly longbridge: LongbridgeCliAdapter) {}
+  constructor(private readonly marketData: MarketDataProvider) {}
 
   getDailyKLines(symbol: string, request?: KLineRequest): Promise<KLine[]> {
-    return this.longbridge.getKLines(symbol, request);
+    return this.marketData.getKLines(symbol, request);
   }
 }

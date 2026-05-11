@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { Holding, KLine, Quote } from "../domain/types.js";
+import type { KLineRequest, TradeLivingDataProvider } from "./data-provider.js";
 import {
   longbridgeHoldingsSchema,
   longbridgeKLinesSchema,
@@ -11,13 +12,7 @@ const execFileAsync = promisify(execFile);
 
 export type LongbridgeCommandRunner = (args: string[]) => Promise<unknown>;
 
-export interface KLineRequest {
-  start?: string;
-  period?: "day" | "week" | "month" | "minute";
-  adjust?: "none" | "forward";
-}
-
-export class LongbridgeCliAdapter {
+export class LongbridgeCliAdapter implements TradeLivingDataProvider {
   constructor(
     private readonly cliPath = "longbridge",
     private readonly commandRunner?: LongbridgeCommandRunner

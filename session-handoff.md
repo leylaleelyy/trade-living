@@ -4,15 +4,43 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 6 test files / 19 tests pass, build succeeds).
-4. Open `feature_list.json` — all 7 features are done.
+3. Run `./init.sh` (expects: 7 test files / 21 tests pass, build succeeds).
+4. Open `feature_list.json` — original 7 features plus `feat-008` are done.
 5. Check this file and `progress.md` for context.
 
 ## Current State
 
-**All planned features are complete and validated against live Longbridge data.**
+**All original planned features are complete and validated against live Longbridge data. The first decoupling feature is also complete.**
 
-The CLI supports 6 commands (`analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), all working in both offline (sample data) and live (`--live`) modes.
+The CLI supports 7 commands (`analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), all working in both offline (sample data) and live (`--live`) modes.
+
+Longbridge CLI is now behind `TradeLivingDataProvider`/`MarketDataProvider`/`PortfolioDataProvider` contracts, so command and service code no longer depends directly on Longbridge CLI implementation details.
+
+## What Was Done This Session (2026-05-11 evening)
+
+### Data Provider Decoupling
+
+Added the first prioritized optimization from the Longbridge CLI coupling discussion:
+
+1. **Requirement tracking** — Added `feat-008` through `feat-011` to `feature_list.json`.
+   - `feat-008` Data Provider Abstraction — done.
+   - `feat-009` Longbridge SDK Or API Provider — todo.
+   - `feat-010` Adapter Contract Test Matrix — todo.
+   - `feat-011` AI JSON Output Contract — todo.
+
+2. **Stable provider contracts** — Added `src/adapters/data-provider.ts` with market, portfolio, enriched portfolio, and combined data provider interfaces.
+
+3. **Provider implementations** — Added `OfflineDataProvider` and `createDataProvider()`. `LongbridgeCliAdapter` now implements the combined provider interface.
+
+4. **Command/service decoupling** — Updated `src/cli.ts`, `src/market/quote.service.ts`, `src/market/kline.service.ts`, and `src/portfolio/holdings.service.ts` to depend on provider interfaces instead of `LongbridgeCliAdapter`.
+
+5. **Offline sample data ownership** — Moved reusable sample K-line/quote/holding data into `src/market/sample-data.ts`.
+
+### Verification
+
+- `npm run check` — pass.
+- `npm test` — pass, 7 test files / 21 tests.
+- `npm run build` — pass.
 
 ## What Was Done This Session (2026-05-11 afternoon)
 
@@ -66,8 +94,8 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 
 Priority order:
 
-1. **Markdown report formatting** — Current `report --markdown` outputs raw JSON values in code blocks. Upgrade to structured sections with tables, color-coded signals, and clear trade plan formatting.
-2. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
-3. **Option pricing** — LEAPS options currently show cost only. Could potentially use `.SYMBOL` prefix format or a different API endpoint.
-4. **Portfolio summary table** — Add a concise table view for `--pretty` output (symbol, qty, price, P/L%, allocation%).
-5. **Multi-symbol analysis** — Support `analyze AAPL.US NVDA.US GOOG.US` or `analyze --portfolio` to analyze all holdings.
+1. **Longbridge SDK/API provider (`feat-009`)** — Add a non-CLI provider implementation behind the new provider contracts.
+2. **Adapter contract test matrix (`feat-010`)** — Harden payload normalization for quote, K-line, and holdings variants.
+3. **AI JSON output contract (`feat-011`)** — Document and test stable machine-consumable JSON for AI callers.
+4. **Markdown report formatting** — Current `report --markdown` outputs raw JSON values in code blocks. Upgrade to structured sections with tables, color-coded signals, and clear trade plan formatting.
+5. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.

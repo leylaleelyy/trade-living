@@ -178,6 +178,11 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `src/report/markdown.reporter.ts` - Added structured portfolio Markdown template.
 - `test/markdown.reporter.test.ts` - Added portfolio Markdown regression coverage.
 
+## Files Modified This Session (2026-05-11 npm package)
+
+- `package.json` - Added npm package publishing metadata, package file allowlist, clean build step, and `prepublishOnly` verification.
+- `package.json` - Applied npm metadata cleanup so the `trade-living` binary points to `dist/cli.js`.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -209,7 +214,10 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] Codex skill preflight: `bash .agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` passed against real Longbridge CN environment.
 - [x] Final harness after skill: `./init.sh` passed with 12 files / 48 tests.
 - [x] Reliability/report enhancements: `npm run dev -- portfolio --markdown` produced structured portfolio report; `./init.sh` passed with 12 files / 52 tests.
+- [x] npm publish preparation: `npm run check`, `npm test`, `npm run build`, and `npm pack --dry-run` passed for `trade-living-cli@0.1.0`.
+- [x] npm package availability: `npm view trade-living-cli version` returned 404, so the package name is currently available.
+- [ ] npm publish: `npm publish --access public` reached `prepublishOnly` successfully but stopped at `ENEEDAUTH`; npm login is required before retrying.
 
 ## Notes for Next Session
 
-All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. npm package publishing is prepared and verified, but the actual publish is blocked until npm authentication is completed. Do not implement automatic trading.

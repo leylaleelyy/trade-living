@@ -204,6 +204,6 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 
 Priority order:
 
-1. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
-2. **Portfolio Markdown template** — Extend the visual template approach to `portfolio --markdown`.
-3. **Option quote enrichment** — Investigate SDK `optionQuote` for LEAPS/options currently shown as cost-only.
+1. **npm publish retry** — Run `npm login` locally, then retry `npm publish --access public`. Publishing preparation is complete and `npm pack --dry-run` is clean for `trade-living-cli@0.1.0`.
+2. **Post-publish verification** — Run `npm view trade-living-cli version` and install/smoke the published CLI package.
+3. **Option quote enrichment** — Investigate additional free or user-configurable option quote sources for LEAPS/options currently shown as cost-only when no provider token is configured.

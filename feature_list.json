@@ -111,6 +111,22 @@
       "dependencies": ["feat-011", "feat-013"],
       "status": "done",
       "evidence": "Added .agents/skills/trade-living-cli with SKILL.md and verify-longbridge-env.sh preflight script. Verification on 2026-05-11: skill preflight passed against real Longbridge CN environment and ./init.sh passed with 12 files / 48 tests."
+    },
+    {
+      "id": "feat-015",
+      "name": "Bearish Range Volatile Fixture Suites",
+      "description": "Add deterministic bearish, range-bound, and high-volatility fixture suites to broaden regime, Triple Screen, and analysis coverage beyond bullish scenarios.",
+      "dependencies": ["feat-003", "feat-004", "feat-010"],
+      "status": "done",
+      "evidence": "Added deterministic bearish, range-bound, and volatile K-line fixtures plus regime/analysis tests. Verification on 2026-05-11: ./init.sh passed with 12 files / 52 tests."
+    },
+    {
+      "id": "feat-016",
+      "name": "Portfolio Markdown Template",
+      "description": "Extend the visual Markdown template approach to portfolio reports with allocation, P/L, concentration, and quote data quality sections.",
+      "dependencies": ["feat-011", "feat-012", "feat-013"],
+      "status": "done",
+      "evidence": "Added structured portfolio Markdown output with overview, allocation bars, holding details, concentration warning, P/L, and quote quality sections. Verification on 2026-05-11: portfolio --markdown smoke passed and ./init.sh passed with 12 files / 52 tests."
     }
   ]
 }

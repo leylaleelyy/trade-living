@@ -1,4 +1,4 @@
-import type { AnalyzeResult, SupportResistanceLevel } from "../domain/types.js";
+import type { AnalyzeResult, Holding, SupportResistanceLevel } from "../domain/types.js";
 
 export function toMarkdownReport(
   title: string,
@@ -8,11 +8,25 @@ export function toMarkdownReport(
     return toAnalyzeMarkdownReport(title, rows);
   }
 
+  if (isPortfolioReport(rows)) {
+    return toPortfolioMarkdownReport(title, rows);
+  }
+
   const body = Object.entries(rows)
     .map(([key, value]) => `- **${key}**: ${formatValue(value)}`)
     .join("\n");
 
   return `# ${title}\n\n${body}\n`;
+}
+
+interface PortfolioReport {
+  holdings: Holding[];
+  risk: {
+    totalMarketValue: number;
+    totalUnrealizedPnl: number;
+    grossExposure: number;
+    maxSinglePositionPct: number;
+  };
 }
 
 function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string {
@@ -76,6 +90,58 @@ function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string
   return `${sections.join("\n")}\n`;
 }
 
+function toPortfolioMarkdownReport(title: string, portfolio: PortfolioReport): string {
+  const pricedHoldings = portfolio.holdings.filter((holding) => holding.marketValue !== undefined);
+  const unpricedHoldings = portfolio.holdings.filter((holding) => holding.marketValue === undefined);
+  const totalMarketValue = portfolio.risk.totalMarketValue;
+  const totalCost = portfolio.holdings.reduce(
+    (sum, holding) => sum + holding.avgCost * holding.quantity * (isOptionLike(holding.symbol) ? 100 : 1),
+    0
+  );
+  const pnlPct = totalCost > 0 ? (portfolio.risk.totalUnrealizedPnl / totalCost) * 100 : 0;
+  const action = portfolioAction(portfolio, unpricedHoldings.length);
+  const sorted = [...portfolio.holdings].sort(
+    (a, b) => (b.marketValue ?? 0) - (a.marketValue ?? 0)
+  );
+
+  const sections = [
+    `# ${title}`,
+    "",
+    `<span style="color:${action.color}">■</span> **组合重点：${action.label}**`,
+    "",
+    action.reason,
+    "",
+    "## 组合总览",
+    "",
+    "| 指标 | 数值 | 解读 |",
+    "|---|---:|---|",
+    `| ${icon("portfolio")} 已计价市值 | ${money(totalMarketValue)} | ${pricedHoldings.length}/${portfolio.holdings.length} 个持仓有市值 |`,
+    `| ${icon("quality")} 未实现盈亏 | ${badge(`${money(portfolio.risk.totalUnrealizedPnl)} (${formatNumber(pnlPct)}%)`, pnlColor(portfolio.risk.totalUnrealizedPnl))} | ${pnlNarrative(portfolio.risk.totalUnrealizedPnl)} |`,
+    `| ${icon("risk")} 最大单一持仓 | ${badge(`${formatNumber(portfolio.risk.maxSinglePositionPct)}%`, concentrationColor(portfolio.risk.maxSinglePositionPct))} | ${concentrationNarrative(portfolio.risk.maxSinglePositionPct)} |`,
+    `| ${icon("warning")} 未计价持仓 | ${badge(String(unpricedHoldings.length), unpricedHoldings.length ? "#d97706" : "#16a34a")} | ${unpricedHoldings.length ? "需要补充报价或保守估值。" : "报价覆盖完整。"} |`,
+    "",
+    "## 配置视图",
+    "",
+    allocationBars(sorted, totalMarketValue),
+    "",
+    "## 持仓明细",
+    "",
+    "| 标的 | 数量 | 均价 | 市价 | 市值 | 盈亏 | 占比 | 数据质量 |",
+    "|---|---:|---:|---:|---:|---:|---:|---|",
+    ...sorted.map((holding) => holdingRow(holding, totalMarketValue)),
+    "",
+    "## 报价质量",
+    "",
+    `- ${icon("quality")} 已计价：${pricedHoldings.length} 个`,
+    `- ${icon("warning")} 未计价：${unpricedHoldings.length} 个`,
+    ...quoteQualityRows(unpricedHoldings),
+    "",
+    "> 说明：组合报告只用于风险识别和持仓质量评估，不构成交易指令。"
+  ];
+
+  return `${sections.join("\n")}\n`;
+}
+
 function formatValue(value: unknown): string {
   if (typeof value === "object" && value !== null) {
     return `\`${JSON.stringify(value)}\``;
@@ -94,6 +160,17 @@ function isAnalyzeResult(value: unknown): value is AnalyzeResult {
     isRecord(value.momentum) &&
     isRecord(value.tradePlan) &&
     isRecord(value.tradeQuality)
+  );
+}
+
+function isPortfolioReport(value: unknown): value is PortfolioReport {
+  if (!isRecord(value)) return false;
+  if (!Array.isArray(value.holdings) || !isRecord(value.risk)) return false;
+  return (
+    typeof value.risk.totalMarketValue === "number" &&
+    typeof value.risk.totalUnrealizedPnl === "number" &&
+    typeof value.risk.grossExposure === "number" &&
+    typeof value.risk.maxSinglePositionPct === "number"
   );
 }
 
@@ -120,10 +197,120 @@ function icon(name: string): string {
     stop: "■",
     target: "◎",
     divergence: "◇",
-    warning: "!"
+    warning: "!",
+    portfolio: "▣"
   };
 
   return icons[name] ?? "•";
+}
+
+function portfolioAction(
+  portfolio: PortfolioReport,
+  unpricedCount: number
+): { label: string; color: string; reason: string } {
+  if (portfolio.risk.maxSinglePositionPct >= 25) {
+    return {
+      label: "集中度偏高",
+      color: "#dc2626",
+      reason: "最大单一持仓占比较高，优先检查仓位集中风险。"
+    };
+  }
+  if (unpricedCount > 0) {
+    return {
+      label: "报价不完整",
+      color: "#d97706",
+      reason: "部分持仓缺少可用市价，组合风险和盈亏需要按保守口径解读。"
+    };
+  }
+  return {
+    label: "报价覆盖完整",
+    color: "#16a34a",
+    reason: "当前持仓均有市值，可直接用于组合风险和盈亏评估。"
+  };
+}
+
+function allocationBars(holdings: Holding[], totalMarketValue: number): string {
+  const rows = holdings
+    .filter((holding) => holding.marketValue !== undefined)
+    .slice(0, 10)
+    .map((holding) => {
+      const pct = totalMarketValue > 0 ? ((holding.marketValue ?? 0) / totalMarketValue) * 100 : 0;
+      return `${holding.symbol.padEnd(22, " ")} ${scoreBar(Math.min(100, pct * 5))} ${formatNumber(pct)}%`;
+    });
+
+  return ["```text", "Top allocations", ...rows, "```"].join("\n");
+}
+
+function holdingRow(holding: Holding, totalMarketValue: number): string {
+  const allocation =
+    holding.marketValue !== undefined && totalMarketValue > 0
+      ? `${formatNumber((holding.marketValue / totalMarketValue) * 100)}%`
+      : "n/a";
+  const quality = holding.quoteSource
+    ? `${holding.quoteSource}/${holding.quoteDelay ?? "unknown"}`
+    : holding.marketPrice !== undefined
+      ? "priced"
+      : "cost-only";
+
+  return [
+    `| ${holding.symbol}`,
+    formatNumber(holding.quantity),
+    money(holding.avgCost),
+    holding.marketPrice === undefined ? "n/a" : money(holding.marketPrice),
+    holding.marketValue === undefined ? "n/a" : money(holding.marketValue),
+    holding.unrealizedPnl === undefined
+      ? "n/a"
+      : badge(money(holding.unrealizedPnl), pnlColor(holding.unrealizedPnl)),
+    allocation,
+    `${quality} |`
+  ].join(" | ");
+}
+
+function quoteQualityRows(unpricedHoldings: Holding[]): string[] {
+  if (unpricedHoldings.length === 0) {
+    return [`- ${icon("quality")} 所有持仓均已有可用报价。`];
+  }
+
+  return [
+    `- ${icon("warning")} 未计价标的：${unpricedHoldings.map((holding) => holding.symbol).join(", ")}`,
+    "- 可配置 `--option-quote-provider tradier|marketdata|auto` 尝试延迟期权报价补全。"
+  ];
+}
+
+function money(value: number): string {
+  const sign = value < 0 ? "-" : "";
+  return `${sign}$${Math.abs(value).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+function pnlColor(value: number): string {
+  if (value > 0) return "#16a34a";
+  if (value < 0) return "#dc2626";
+  return "#2563eb";
+}
+
+function pnlNarrative(value: number): string {
+  if (value > 0) return "组合当前为浮盈。";
+  if (value < 0) return "组合当前为浮亏。";
+  return "组合盈亏接近持平。";
+}
+
+function concentrationColor(value: number): string {
+  if (value >= 25) return "#dc2626";
+  if (value >= 15) return "#d97706";
+  return "#16a34a";
+}
+
+function concentrationNarrative(value: number): string {
+  if (value >= 25) return "集中度偏高。";
+  if (value >= 15) return "集中度需要观察。";
+  return "单一持仓集中度可控。";
+}
+
+function isOptionLike(symbol: string): boolean {
+  return /\d{6}[CP]\d+\./.test(symbol);
 }
 
 function scoreBar(score: number): string {

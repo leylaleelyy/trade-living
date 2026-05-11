@@ -5,11 +5,39 @@ import { calculatePositionSize } from "../src/risk/position-sizing.service.js";
 import { calculateTradeQuality } from "../src/systems/trade-quality.engine.js";
 import { evaluateTripleScreen } from "../src/systems/triple-screen.system.js";
 import { analyzeKLines } from "../src/systems/setup-engine.js";
-import { fixtureKLines } from "./fixtures.js";
+import {
+  bearishFixtureKLines,
+  fixtureKLines,
+  rangeFixtureKLines,
+  volatileFixtureKLines
+} from "./fixtures.js";
 
 describe("analysis systems", () => {
   it("detects market regime from trend data", () => {
     expect(detectMarketRegime(fixtureKLines)).toBe("trending_bull");
+  });
+
+  it("detects bearish market regime from downtrend data", () => {
+    expect(detectMarketRegime(bearishFixtureKLines)).toBe("trending_bear");
+    const analysis = analyzeKLines("BEAR.US", bearishFixtureKLines);
+
+    expect(analysis.marketRegime).toBe("trending_bear");
+    expect(analysis.tradeQuality.grade).not.toBe("A+");
+  });
+
+  it("detects range-bound market regime from sideways data", () => {
+    expect(detectMarketRegime(rangeFixtureKLines)).toMatch(/range|compression/);
+    const analysis = analyzeKLines("RANGE.US", rangeFixtureKLines);
+
+    expect(analysis.tradeQuality.grade).not.toBe("A+");
+  });
+
+  it("detects volatile market regime from high-range data", () => {
+    expect(detectMarketRegime(volatileFixtureKLines)).toBe("volatile");
+    const analysis = analyzeKLines("VOL.US", volatileFixtureKLines);
+
+    expect(analysis.marketRegime).toBe("volatile");
+    expect(analysis.warnings.length).toBeGreaterThan(0);
   });
 
   it("finds structure levels", () => {

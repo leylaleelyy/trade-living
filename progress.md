@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:48 Asia/Shanghai
-**Active Feature:** Codex skill for AI invocation complete
+**Last Updated:** 2026-05-11 19:54 Asia/Shanghai
+**Active Feature:** Reliability and portfolio report enhancements complete
 
 ## Status
 
@@ -69,6 +69,11 @@
 - [x] Implemented `feat-014` Codex Skill For AI Invocation.
 - [x] Added project-local `.agents/skills/trade-living-cli/SKILL.md` with preflight, provider selection, AI output, and failure handling guidance.
 - [x] Added `.agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` for repeatable environment checks.
+- [x] Implemented `feat-015` Bearish Range Volatile Fixture Suites.
+- [x] Added deterministic bearish, range-bound, and high-volatility K-line fixtures.
+- [x] Added regime/analysis tests for non-bullish scenarios.
+- [x] Implemented `feat-016` Portfolio Markdown Template.
+- [x] Portfolio Markdown now includes overview, allocation bars, holding detail table, concentration warning, P/L, and quote quality sections.
 
 ### What's In Progress
 
@@ -76,9 +81,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 
 ### What's Next
 
-1. Add bearish/range/volatile fixture test suites.
-2. Extend the visual Markdown template to portfolio reports.
-3. Configure a real `TRADIER_TOKEN` or `MARKETDATA_TOKEN` to enable external option quote enrichment in live portfolio runs.
+1. Configure a real `TRADIER_TOKEN` or `MARKETDATA_TOKEN` to enable external option quote enrichment in live portfolio runs.
+2. Consider adding sector/benchmark relative strength once a reliable benchmark data source is selected.
 
 ## Blockers / Risks
 
@@ -166,6 +170,14 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `.agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` - Added deterministic preflight script for project, Longbridge, SDK auth, option provider tokens, and CLI smoke checks.
 - `feature_list.json` - Added and completed `feat-014`.
 
+## Files Modified This Session (2026-05-11 enhancements)
+
+- `feature_list.json` - Added and completed `feat-015` and `feat-016`.
+- `test/fixtures.ts` - Added bearish, range-bound, and volatile K-line fixtures.
+- `test/systems.test.ts` - Added non-bullish regime and analysis coverage.
+- `src/report/markdown.reporter.ts` - Added structured portfolio Markdown template.
+- `test/markdown.reporter.test.ts` - Added portfolio Markdown regression coverage.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -196,7 +208,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] Option quote providers: `npm run check` and `npm test` passed with 12 files / 48 tests.
 - [x] Codex skill preflight: `bash .agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` passed against real Longbridge CN environment.
 - [x] Final harness after skill: `./init.sh` passed with 12 files / 48 tests.
+- [x] Reliability/report enhancements: `npm run dev -- portfolio --markdown` produced structured portfolio report; `./init.sh` passed with 12 files / 52 tests.
 
 ## Notes for Next Session
 
-All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Do not implement automatic trading.

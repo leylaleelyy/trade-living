@@ -4,7 +4,7 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 12 test files / 48 tests pass, build succeeds).
+3. Run `./init.sh` (expects: 12 test files / 52 tests pass, build succeeds).
 4. Open `feature_list.json` — all tracked features are done.
 5. Check this file and `progress.md` for context.
 
@@ -23,6 +23,20 @@ The official Longbridge Node.js SDK is available through `--data-provider sdk`. 
 Option holdings can be enriched through external delayed quote providers when configured with `--option-quote-provider tradier|marketdata|auto`. Enriched option holdings include `quoteSource` and `quoteDelay`.
 
 The repository now ships a project-local Codex skill at `.agents/skills/trade-living-cli` for safe AI invocation and Longbridge preflight validation.
+
+## What Was Done This Session (2026-05-11 enhancements)
+
+### Reliability And Portfolio Reports
+
+Completed two enhancement features after all core requirements were done:
+
+1. **`feat-015` Bearish Range Volatile Fixture Suites** — Added deterministic bearish, range-bound, and volatile K-line fixtures and analysis coverage.
+2. **`feat-016` Portfolio Markdown Template** — Added a structured portfolio Markdown report with overview, allocation bars, holding details, concentration warning, P/L, and quote quality sections.
+
+### Verification
+
+- `npm run dev -- portfolio --markdown` — pass, structured portfolio report produced.
+- `./init.sh` — pass, 12 test files / 52 tests.
 
 ## What Was Done This Session (2026-05-11 skill)
 

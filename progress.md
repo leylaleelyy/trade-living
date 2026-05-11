@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:01 Asia/Shanghai
-**Active Feature:** Data provider abstraction complete
+**Last Updated:** 2026-05-11 19:10 Asia/Shanghai
+**Active Feature:** Markdown interpretation template complete
 
 ## Status
 
@@ -47,18 +47,21 @@
 - [x] Added offline and Longbridge provider implementations behind `createDataProvider()`.
 - [x] Updated CLI, quote service, kline service, and holdings service to depend on provider interfaces instead of `LongbridgeCliAdapter`.
 - [x] Added provider factory tests.
+- [x] Added `feat-012` Markdown Interpretation Template to capture the AI-facing report formatting requirement.
+- [x] Upgraded analysis Markdown output with highlighted conclusion, colored signal badges, icon markers, visual score bars, price ladder, divergence/risk section, and trade plan checklist.
+- [x] Added Markdown reporter coverage to ensure analysis output renders as a structured template instead of raw JSON.
 
 ### What's In Progress
 
-Nothing in progress. The first decoupling feature is done and validated.
+Nothing in progress. The Markdown interpretation template is done and validated.
 
 ### What's Next
 
 1. Implement `feat-009` Longbridge SDK/API provider behind the provider contracts.
 2. Implement `feat-010` adapter contract test matrix for external payload normalization.
 3. Implement `feat-011` AI JSON output contract documentation and tests.
-4. Improve Markdown report formatting from compact JSON into reader-friendly sections.
-5. Add bearish/range/volatile fixture test suites.
+4. Add bearish/range/volatile fixture test suites.
+5. Extend the visual Markdown template to portfolio reports.
 
 ## Blockers / Risks
 
@@ -76,6 +79,7 @@ Nothing in progress. The first decoupling feature is done and validated.
 - **Options skipped in enrichment:** Symbols matching `\d{6}[CP]\d+\.` are identified as options and skipped since the quote API returns empty arrays for them.
 - **Holding fields optional:** `marketPrice`, `marketValue`, `unrealizedPnl` are optional in the domain type; downstream consumers (portfolio risk, account summary) fall back to cost-based calculations.
 - **Provider contract first:** CLI and services depend on Trade Living provider interfaces. Longbridge CLI is now one provider implementation, not the command layer's direct dependency.
+- **Markdown as AI interpretation template:** Analysis Markdown should be structured, skimmable, and visually prioritized for AI/user consumption while JSON remains the stable machine contract.
 
 ## Files Modified This Session (2026-05-11 afternoon)
 
@@ -98,6 +102,12 @@ Nothing in progress. The first decoupling feature is done and validated.
 - `src/market/quote.service.ts`, `src/market/kline.service.ts`, `src/portfolio/holdings.service.ts` - Services now depend on provider interfaces.
 - `test/data-provider.test.ts` - Added provider factory and offline provider coverage.
 
+## Files Modified This Session (2026-05-11 report template)
+
+- `feature_list.json` - Added and completed `feat-012` Markdown Interpretation Template.
+- `src/report/markdown.reporter.ts` - Added structured analysis template with highlighted conclusion, colored badges, icon markers, score bars, price ladder, risk warnings, and trade plan checklist.
+- `test/markdown.reporter.test.ts` - Added regression coverage for structured Markdown output.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -119,7 +129,8 @@ Nothing in progress. The first decoupling feature is done and validated.
 - [x] `--live force AAPL.US` — Force Index EMA2/EMA13 values returned.
 - [x] `--live report AAPL.US` — full analysis report with trade plan.
 - [x] Data provider abstraction: `npm run check`, `npm test` (7 files / 21 tests), `npm run build`, and `./init.sh` passed on 2026-05-11.
+- [x] Markdown interpretation template: `npm run dev -- report AMZN.US --markdown` produced structured template output; `./init.sh` passed with 8 test files / 22 tests on 2026-05-11.
 
 ## Notes for Next Session
 
-All original 7 planned features plus `feat-008` are complete. Live Longbridge integration remains behind a provider interface. Continue with `feat-009` if adding SDK/API access, or `feat-010` if hardening existing adapters first. Do not implement automatic trading.
+All original 7 planned features plus `feat-008` and `feat-012` are complete. Live Longbridge integration remains behind a provider interface. Markdown analysis reports are now structured for AI-facing interpretation. Continue with `feat-009` if adding SDK/API access, or `feat-010` if hardening existing adapters first. Do not implement automatic trading.

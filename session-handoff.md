@@ -4,17 +4,35 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 7 test files / 21 tests pass, build succeeds).
-4. Open `feature_list.json` — original 7 features plus `feat-008` are done.
+3. Run `./init.sh` (expects: 8 test files / 22 tests pass, build succeeds).
+4. Open `feature_list.json` — original 7 features plus `feat-008` and `feat-012` are done.
 5. Check this file and `progress.md` for context.
 
 ## Current State
 
-**All original planned features are complete and validated against live Longbridge data. The first decoupling feature is also complete.**
+**All original planned features are complete and validated against live Longbridge data. The first decoupling feature and Markdown interpretation template are also complete.**
 
 The CLI supports 7 commands (`analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), all working in both offline (sample data) and live (`--live`) modes.
 
 Longbridge CLI is now behind `TradeLivingDataProvider`/`MarketDataProvider`/`PortfolioDataProvider` contracts, so command and service code no longer depends directly on Longbridge CLI implementation details.
+
+`report --markdown` and `analyze --markdown` now render structured AI-facing interpretation reports with highlighted conclusions, colored signal badges, icon markers, visual score bars, price ladder, risk warnings, and a trade-plan checklist.
+
+## What Was Done This Session (2026-05-11 report template)
+
+### Markdown Interpretation Template
+
+Added `feat-012` after the AMZN analysis flow showed that returned interpretation content should be reusable, visually prioritized, and easier for AI/user consumption.
+
+1. **Structured template** — `AnalyzeResult` Markdown output now uses sections for key conclusion, signal overview, visual scores, price map, divergence/risk, and trade plan.
+2. **Visual priority** — Added colored HTML span badges, icon markers, score bars, and a text price ladder.
+3. **Fallback preserved** — Generic Markdown rows still use the existing fallback path for non-analysis outputs.
+4. **Tests** — Added regression coverage to ensure analysis Markdown is structured and no longer rendered as raw JSON.
+
+### Verification
+
+- `npm run dev -- report AMZN.US --markdown` — produced structured template output.
+- `./init.sh` — pass, 8 test files / 22 tests.
 
 ## What Was Done This Session (2026-05-11 evening)
 
@@ -97,5 +115,5 @@ Priority order:
 1. **Longbridge SDK/API provider (`feat-009`)** — Add a non-CLI provider implementation behind the new provider contracts.
 2. **Adapter contract test matrix (`feat-010`)** — Harden payload normalization for quote, K-line, and holdings variants.
 3. **AI JSON output contract (`feat-011`)** — Document and test stable machine-consumable JSON for AI callers.
-4. **Markdown report formatting** — Current `report --markdown` outputs raw JSON values in code blocks. Upgrade to structured sections with tables, color-coded signals, and clear trade plan formatting.
-5. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
+4. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
+5. **Portfolio Markdown template** — Extend the visual template approach to `portfolio --markdown`.

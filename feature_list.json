@@ -87,6 +87,14 @@
       "dependencies": ["feat-007", "feat-008"],
       "status": "todo",
       "evidence": ""
+    },
+    {
+      "id": "feat-012",
+      "name": "Markdown Interpretation Template",
+      "description": "Upgrade analysis Markdown output into a reusable interpretation template with highlighted priorities, icon markers, tables, and visual price/risk sections for AI-facing reports.",
+      "dependencies": ["feat-007"],
+      "status": "done",
+      "evidence": "Implemented structured analysis Markdown template with highlighted conclusion, colored signal badges, icon markers, score bars, price ladder, risk warnings, and trade plan checklist. Added markdown reporter test. Verification on 2026-05-11: ./init.sh passed with 8 test files / 22 tests."
     }
   ]
 }

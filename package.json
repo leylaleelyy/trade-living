@@ -11,7 +11,7 @@
     "README.md"
   ],
   "bin": {
-    "trade-living": "./dist/cli.js"
+    "trade-living": "dist/cli.js"
   },
   "scripts": {
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",

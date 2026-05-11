@@ -1,0 +1,60 @@
+{
+  "features": [
+    {
+      "id": "feat-001",
+      "name": "CLI Foundation",
+      "description": "Initialize TypeScript project, Commander command surface, shared output path, and baseline verification.",
+      "dependencies": [],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11: npm install, npm run check, npm test, and npm run build. Built CLI smoke command returned placeholder analysis JSON."
+    },
+    {
+      "id": "feat-002",
+      "name": "Longbridge Data Access",
+      "description": "Implement Longbridge CLI adapter for quote, candlesticks, and portfolio data with schema validation.",
+      "dependencies": ["feat-001"],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11: Longbridge quote, candlesticks, and portfolio adapter methods parse fixture payloads with Zod schemas. Tests: 4 files / 7 tests."
+    },
+    {
+      "id": "feat-003",
+      "name": "Indicator System",
+      "description": "Implement MA, MACD Histogram, RSI, ATR, Force Index, VWAP, Elder-Ray, and divergence primitives.",
+      "dependencies": ["feat-001", "feat-002"],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11. Implemented MA, MACD, RSI, ATR, Force Index, Elder-Ray, VWAP, and divergence primitives with fixture tests."
+    },
+    {
+      "id": "feat-004",
+      "name": "Triple Screen And Momentum",
+      "description": "Implement Triple Screen filters, market regime handling, and momentum score system.",
+      "dependencies": ["feat-003"],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11. Implemented Triple Screen, market regime detection, and momentum scoring with system tests."
+    },
+    {
+      "id": "feat-005",
+      "name": "Structure And Divergence",
+      "description": "Implement support/resistance scoring and MACD, RSI, and Force Index divergence analysis.",
+      "dependencies": ["feat-003"],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11. Implemented swing/MA support-resistance and MACD/Force Index divergence signals."
+    },
+    {
+      "id": "feat-006",
+      "name": "Risk And Position Planning",
+      "description": "Implement position sizing, stops, targets, risk/reward grading, and portfolio risk aggregation.",
+      "dependencies": ["feat-001", "feat-003"],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11. Implemented 2% position sizing, stop/target engines, RR grading, and portfolio risk aggregation."
+    },
+    {
+      "id": "feat-007",
+      "name": "Trade Quality And Reports",
+      "description": "Implement trade quality scoring and JSON/Markdown reports for analyze and report commands.",
+      "dependencies": ["feat-004", "feat-005", "feat-006"],
+      "status": "done",
+      "evidence": "./init.sh passed on 2026-05-11. All 6 CLI commands validated against live Longbridge data. Fixed schema mismatch, rate limiting, and option symbol handling. 6 test files / 19 tests pass."
+    }
+  ]
+}

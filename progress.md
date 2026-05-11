@@ -1,0 +1,105 @@
+# Session Progress Log
+
+## Current State
+
+**Last Updated:** 2026-05-11 17:54 Asia/Shanghai
+**Active Feature:** Longbridge live environment validated and bug-fixed
+
+## Status
+
+### What's Done
+
+- [x] Read the Trade Living CLI technical plan.
+- [x] Initialized TypeScript, Commander, Vitest, and tsx project configuration.
+- [x] Created initial CLI command surface matching the technical plan.
+- [x] Added baseline domain types, Longbridge adapter scaffold, risk/reward service, reporters, and tests.
+- [x] Added harness files for startup, scope control, state tracking, verification, and handoff.
+- [x] Ran `./init.sh`; dependency installation, type check, tests, and build passed.
+- [x] Fixed build output configuration so package bin resolves to `dist/cli.js`.
+- [x] Verified built CLI smoke command with `node dist/cli.js analyze AAPL.US --pretty`.
+- [x] Implemented Longbridge quote, candlestick, and portfolio adapter methods.
+- [x] Added Zod schemas that normalize wrapped Longbridge payloads and numeric strings.
+- [x] Added market quote/kline services and portfolio holdings/account summary services.
+- [x] Added fixture-based Longbridge tests with no live credentials required.
+- [x] Ran `./init.sh`; dependency install check, type check, tests, and build passed.
+- [x] Implemented indicator primitives: MA, MACD Histogram, RSI, ATR, Force Index, Elder-Ray, VWAP, and divergence.
+- [x] Implemented market regime detection, support/resistance, Triple Screen, and momentum scoring.
+- [x] Implemented position sizing, stops, targets, portfolio risk, and trade quality scoring.
+- [x] Wired CLI commands to functional offline analysis outputs.
+- [x] Added fixture tests for indicators, systems, risk, and complete analysis.
+- [x] Ran final `./init.sh`; 6 test files / 19 tests passed.
+- [x] Wrote `docs/LONGBRIDGE_INTEGRATION_PLAN.md`.
+- [x] Updated Longbridge adapter to use `quote`, `kline history`, and `positions`.
+- [x] Added official quote-style `last` field and array payload support.
+- [x] Added CLI `--live`, `--longbridge-cli`, and `--start` options.
+- [x] Wired `analyze`, `momentum`, `triple`, `force`, `portfolio`, and `report` to use Longbridge CLI when `--live` is set.
+- [x] Fixed `report --json` to respect explicit JSON output.
+- [x] Validated live mode against authenticated Longbridge Terminal.
+- [x] Fixed Holding schema: `marketPrice`/`marketValue`/`unrealizedPnl` now optional (Longbridge `positions` API does not return them).
+- [x] Added `getEnrichedHoldings()` method: fetches quote per holding to compute market price, market value, and P/L.
+- [x] Fixed rate limiting: changed from `Promise.all` (24 concurrent) to sequential quote requests.
+- [x] Added option symbol detection: LEAPS/options symbols are skipped during quote enrichment since the API does not support them.
+- [x] Updated `Holding` type: added optional `name` and `currency` fields from Longbridge response.
+- [x] Updated `calculatePortfolioRisk` and `summarizeHoldings` to handle optional market fields gracefully.
+- [x] Full live environment test: all 6 CLI commands pass with real Longbridge data.
+
+### What's In Progress
+
+Nothing in progress. All planned features are done and validated.
+
+### What's Next
+
+1. Improve Markdown report formatting from compact JSON into reader-friendly sections.
+2. Add bearish/range/volatile fixture test suites.
+3. Consider batching quote requests if Longbridge adds a multi-symbol endpoint.
+4. Add option pricing support (currently options show cost only).
+
+## Blockers / Risks
+
+- [x] Live Longbridge validation requires the `longbridge` CLI and credentials on the host. (Validated)
+- [x] Dependency installation requires network access to npm.
+- [ ] npm reported 5 moderate vulnerabilities in the full dependency tree; production dependency audit is clean.
+- [ ] Option symbols (LEAPS) cannot be quoted via the Longbridge quote API; only cost data is shown.
+
+## Decisions Made
+
+- **No automatic trading:** The CLI remains analysis and risk control only.
+- **Adapter boundary first:** Longbridge calls stay inside `src/adapters/` so domain logic can be tested offline.
+- **Milestone-based scope:** The feature tracker follows the technical plan milestones.
+- **Sequential quote enrichment:** Holdings are enriched one-by-one to avoid API rate limiting (previously concurrent `Promise.all` caused random failures).
+- **Options skipped in enrichment:** Symbols matching `\d{6}[CP]\d+\.` are identified as options and skipped since the quote API returns empty arrays for them.
+- **Holding fields optional:** `marketPrice`, `marketValue`, `unrealizedPnl` are optional in the domain type; downstream consumers (portfolio risk, account summary) fall back to cost-based calculations.
+
+## Files Modified This Session (2026-05-11 afternoon)
+
+- `src/domain/types.ts` - `Holding.marketPrice`/`marketValue`/`unrealizedPnl` made optional; added `name` and `currency`.
+- `src/adapters/longbridge.schemas.ts` - Schema updated: `name`/`currency` parsed; market fields no longer error when missing.
+- `src/adapters/longbridge-cli.adapter.ts` - Added `getEnrichedHoldings()` (sequential quote enrichment) and `isOptionSymbol()`.
+- `src/cli.ts` - Portfolio command now calls `getEnrichedHoldings()` instead of `getHoldings()`.
+- `src/risk/portfolio-risk.service.ts` - Handles optional `marketValue`/`unrealizedPnl` with fallback calculations.
+- `src/portfolio/account.service.ts` - Handles optional `marketValue`/`unrealizedPnl` with fallback calculations.
+
+## Evidence of Completion
+
+- [x] Install: `npm install` completed.
+- [x] Type check: `npm run check` passed.
+- [x] Tests: `npm test` passed, 6 files / 19 tests.
+- [x] Build: `npm run build` passed.
+- [x] CLI smoke: `node dist/cli.js analyze AAPL.US --pretty` returned placeholder analysis JSON.
+- [x] Production audit: `npm audit --omit=dev` found 0 vulnerabilities.
+- [x] Full harness: `./init.sh` passed for feat-002.
+- [x] Final harness: `./init.sh` passed with 6 test files / 19 tests.
+- [x] CLI smoke: `node dist/cli.js analyze AAPL.US --pretty`, `risk`, `report`, and `momentum` produced outputs.
+- [x] Longbridge integration harness: `./init.sh` passed after adapter and CLI live-mode changes.
+- [x] CLI smoke: `node dist/cli.js report AAPL.US --json` outputs JSON; `--markdown` outputs Markdown.
+- [x] `longbridge check` — token OK, CN connectivity OK.
+- [x] `--live portfolio` — 15/15 stock/ETF holdings enriched with real-time quotes; 9 options show cost only.
+- [x] `--live analyze AAPL.US` — trending_bull, momentum 79, trade quality A.
+- [x] `--live momentum AAPL.US` — score 79 with factor breakdown.
+- [x] `--live triple AAPL.US` — bullish trend, neutral decision.
+- [x] `--live force AAPL.US` — Force Index EMA2/EMA13 values returned.
+- [x] `--live report AAPL.US` — full analysis report with trade plan.
+
+## Notes for Next Session
+
+All 7 planned features are complete. Live Longbridge integration is validated and working. The main remaining improvements are cosmetic (Markdown report formatting) and coverage expansion (bearish/volatile fixture suites). Do not implement automatic trading.

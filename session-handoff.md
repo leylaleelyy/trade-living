@@ -4,19 +4,37 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 8 test files / 22 tests pass, build succeeds).
-4. Open `feature_list.json` — original 7 features plus `feat-008` and `feat-012` are done.
+3. Run `./init.sh` (expects: 9 test files / 34 tests pass, build succeeds).
+4. Open `feature_list.json` — original 7 features plus `feat-008`, `feat-010`, and `feat-012` are done.
 5. Check this file and `progress.md` for context.
 
 ## Current State
 
-**All original planned features are complete and validated against live Longbridge data. The first decoupling feature and Markdown interpretation template are also complete.**
+**All original planned features are complete and validated against live Longbridge data. The provider abstraction, adapter contract matrix, and Markdown interpretation template are also complete.**
 
 The CLI supports 7 commands (`analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), all working in both offline (sample data) and live (`--live`) modes.
 
 Longbridge CLI is now behind `TradeLivingDataProvider`/`MarketDataProvider`/`PortfolioDataProvider` contracts, so command and service code no longer depends directly on Longbridge CLI implementation details.
 
 `report --markdown` and `analyze --markdown` now render structured AI-facing interpretation reports with highlighted conclusions, colored signal badges, icon markers, visual score bars, price ladder, risk warnings, and a trade-plan checklist.
+
+## What Was Done This Session (2026-05-11 adapter contracts)
+
+### Adapter Contract Test Matrix
+
+Completed `feat-010` to lock Longbridge external payload variants into stable internal domain models before adding more providers.
+
+1. **Quote contracts** — Covered array payloads, wrapped `data`, `last`, `last_done`, `lastDone`, `change_rate`, and `changeRate`.
+2. **K-line contracts** — Covered `data.candlesticks`, `data.list`, `data.items`, ISO dates, and numeric timestamp strings.
+3. **Holding contracts** — Covered live positions without market fields, fixture-style market fields, and camelCase internal-like payloads.
+4. **Failure contracts** — Added rejection cases for missing quote price, missing K-line timestamp, and missing holding cost basis.
+
+### Verification
+
+- `npm run check` — pass.
+- `npm test` — pass, 9 test files / 34 tests.
+- `npm run build` — pass.
+- `./init.sh` — pass.
 
 ## What Was Done This Session (2026-05-11 report template)
 
@@ -113,7 +131,6 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 Priority order:
 
 1. **Longbridge SDK/API provider (`feat-009`)** — Add a non-CLI provider implementation behind the new provider contracts.
-2. **Adapter contract test matrix (`feat-010`)** — Harden payload normalization for quote, K-line, and holdings variants.
-3. **AI JSON output contract (`feat-011`)** — Document and test stable machine-consumable JSON for AI callers.
-4. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
-5. **Portfolio Markdown template** — Extend the visual template approach to `portfolio --markdown`.
+2. **AI JSON output contract (`feat-011`)** — Document and test stable machine-consumable JSON for AI callers.
+3. **Bearish/volatile fixture suites** — All current test fixtures model bullish scenarios. Add fixture data for bear markets, range-bound, and high-volatility regimes to improve coverage.
+4. **Portfolio Markdown template** — Extend the visual template approach to `portfolio --markdown`.

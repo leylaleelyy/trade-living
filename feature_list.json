@@ -77,8 +77,8 @@
       "name": "Adapter Contract Test Matrix",
       "description": "Add fixture-driven contract tests that lock external payload normalization into stable internal Quote, KLine, and Holding models.",
       "dependencies": ["feat-008"],
-      "status": "todo",
-      "evidence": ""
+      "status": "done",
+      "evidence": "Added fixture-driven Longbridge payload contract matrix covering quote, K-line, and holding variants plus rejection cases for missing price/timestamp/cost basis. Verification on 2026-05-11: ./init.sh passed with 9 test files / 34 tests."
     },
     {
       "id": "feat-011",

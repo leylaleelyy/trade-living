@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:10 Asia/Shanghai
-**Active Feature:** Markdown interpretation template complete
+**Last Updated:** 2026-05-11 19:15 Asia/Shanghai
+**Active Feature:** Adapter contract test matrix complete
 
 ## Status
 
@@ -50,18 +50,22 @@
 - [x] Added `feat-012` Markdown Interpretation Template to capture the AI-facing report formatting requirement.
 - [x] Upgraded analysis Markdown output with highlighted conclusion, colored signal badges, icon markers, visual score bars, price ladder, divergence/risk section, and trade plan checklist.
 - [x] Added Markdown reporter coverage to ensure analysis output renders as a structured template instead of raw JSON.
+- [x] Implemented `feat-010` Adapter Contract Test Matrix for Longbridge payload normalization.
+- [x] Added quote contract cases for `last`, `last_done`, `lastDone`, wrapped data, and array payloads.
+- [x] Added K-line contract cases for `candlesticks`, `list`, `items`, ISO dates, and numeric timestamp strings.
+- [x] Added holdings contract cases for live positions without market fields, fixture-style market fields, and camelCase payloads.
+- [x] Added rejection tests for missing quote price, K-line timestamp, and holding cost basis.
 
 ### What's In Progress
 
-Nothing in progress. The Markdown interpretation template is done and validated.
+Nothing in progress. The adapter contract test matrix is done and validated.
 
 ### What's Next
 
 1. Implement `feat-009` Longbridge SDK/API provider behind the provider contracts.
-2. Implement `feat-010` adapter contract test matrix for external payload normalization.
-3. Implement `feat-011` AI JSON output contract documentation and tests.
-4. Add bearish/range/volatile fixture test suites.
-5. Extend the visual Markdown template to portfolio reports.
+2. Implement `feat-011` AI JSON output contract documentation and tests.
+3. Add bearish/range/volatile fixture test suites.
+4. Extend the visual Markdown template to portfolio reports.
 
 ## Blockers / Risks
 
@@ -80,6 +84,7 @@ Nothing in progress. The Markdown interpretation template is done and validated.
 - **Holding fields optional:** `marketPrice`, `marketValue`, `unrealizedPnl` are optional in the domain type; downstream consumers (portfolio risk, account summary) fall back to cost-based calculations.
 - **Provider contract first:** CLI and services depend on Trade Living provider interfaces. Longbridge CLI is now one provider implementation, not the command layer's direct dependency.
 - **Markdown as AI interpretation template:** Analysis Markdown should be structured, skimmable, and visually prioritized for AI/user consumption while JSON remains the stable machine contract.
+- **Adapter contract tests before new providers:** External payload variants are now locked with fixture-driven schema tests before adding SDK/API data sources.
 
 ## Files Modified This Session (2026-05-11 afternoon)
 
@@ -108,6 +113,11 @@ Nothing in progress. The Markdown interpretation template is done and validated.
 - `src/report/markdown.reporter.ts` - Added structured analysis template with highlighted conclusion, colored badges, icon markers, score bars, price ladder, risk warnings, and trade plan checklist.
 - `test/markdown.reporter.test.ts` - Added regression coverage for structured Markdown output.
 
+## Files Modified This Session (2026-05-11 adapter contracts)
+
+- `feature_list.json` - Completed `feat-010` Adapter Contract Test Matrix.
+- `test/longbridge-contracts.test.ts` - Added fixture-driven contract tests for Longbridge quote, K-line, and holdings payload normalization plus rejection cases.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -130,7 +140,8 @@ Nothing in progress. The Markdown interpretation template is done and validated.
 - [x] `--live report AAPL.US` — full analysis report with trade plan.
 - [x] Data provider abstraction: `npm run check`, `npm test` (7 files / 21 tests), `npm run build`, and `./init.sh` passed on 2026-05-11.
 - [x] Markdown interpretation template: `npm run dev -- report AMZN.US --markdown` produced structured template output; `./init.sh` passed with 8 test files / 22 tests on 2026-05-11.
+- [x] Adapter contract test matrix: `npm run check`, `npm test` (9 files / 34 tests), `npm run build`, and `./init.sh` passed on 2026-05-11.
 
 ## Notes for Next Session
 
-All original 7 planned features plus `feat-008` and `feat-012` are complete. Live Longbridge integration remains behind a provider interface. Markdown analysis reports are now structured for AI-facing interpretation. Continue with `feat-009` if adding SDK/API access, or `feat-010` if hardening existing adapters first. Do not implement automatic trading.
+All original 7 planned features plus `feat-008`, `feat-010`, and `feat-012` are complete. Live Longbridge integration remains behind a provider interface. Markdown analysis reports are now structured for AI-facing interpretation. Longbridge payload normalization is covered by contract tests. Continue with `feat-009` if adding SDK/API access, or `feat-011` if stabilizing AI-facing JSON output first. Do not implement automatic trading.

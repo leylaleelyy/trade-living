@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:26 Asia/Shanghai
-**Active Feature:** All tracked requirements complete
+**Last Updated:** 2026-05-11 19:38 Asia/Shanghai
+**Active Feature:** Option quote provider abstraction complete
 
 ## Status
 
@@ -61,6 +61,11 @@
 - [x] SDK provider reads quotes/K-lines through `QuoteContext` and positions through `TradeContext`, behind `TradeLivingDataProvider`.
 - [x] Implemented `feat-011` AI JSON Output Contract with documentation and executable Zod schemas.
 - [x] Added JSON contract tests for analyze/report and portfolio outputs.
+- [x] Implemented `feat-013` Option Quote Provider Abstraction for external delayed option quotes when Longbridge OPRA access is unavailable.
+- [x] Added Tradier option quote adapter with OCC symbol conversion and Greeks parsing.
+- [x] Added MarketData.app option quote adapter with 24h delayed fallback support.
+- [x] Added composite option quote provider and optional portfolio enrichment through `--option-quote-provider`.
+- [x] Extended holdings JSON contract with optional `quoteSource` and `quoteDelay` fields.
 
 ### What's In Progress
 
@@ -70,7 +75,7 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 
 1. Add bearish/range/volatile fixture test suites.
 2. Extend the visual Markdown template to portfolio reports.
-3. Investigate richer option quote support through SDK `optionQuote`.
+3. Configure a real `TRADIER_TOKEN` or `MARKETDATA_TOKEN` to enable external option quote enrichment in live portfolio runs.
 
 ## Blockers / Risks
 
@@ -92,6 +97,7 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - **Adapter contract tests before new providers:** External payload variants are now locked with fixture-driven schema tests before adding SDK/API data sources.
 - **SDK provider is selectable, not default:** `--live` still defaults to Longbridge CLI. Use `--data-provider sdk` to exercise the official Node.js SDK path.
 - **AI JSON is the machine contract:** `docs/AI_JSON_CONTRACT.md` and `src/report/ai-json-contract.ts` define stable JSON shapes; Markdown remains a presentation template.
+- **Option quotes are opt-in:** External option quote providers are only used when `--option-quote-provider` is set, and enriched holdings carry `quoteSource`/`quoteDelay` so AI callers can reason about data quality.
 
 ## Files Modified This Session (2026-05-11 afternoon)
 
@@ -137,6 +143,20 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `test/longbridge-sdk.adapter.test.ts` - Added SDK provider unit coverage with fake contexts.
 - `test/ai-json-contract.test.ts` - Added JSON contract validation coverage.
 
+## Files Modified This Session (2026-05-11 option quotes)
+
+- `feature_list.json` - Added and completed `feat-013` Option Quote Provider Abstraction.
+- `src/domain/types.ts` - Added `OptionQuote`, `Holding.quoteSource`, and `Holding.quoteDelay`.
+- `src/adapters/option-quote-provider.ts` - Added option provider contract, option symbol detection, mark calculation, and composite fallback provider.
+- `src/adapters/tradier-option.adapter.ts` - Added Tradier option quote adapter and OCC symbol conversion.
+- `src/adapters/marketdata-option.adapter.ts` - Added MarketData.app option quote adapter.
+- `src/adapters/option-quote-provider.factory.ts` - Added option quote provider factory for `none`, `tradier`, `marketdata`, and `auto`.
+- `src/portfolio/option-enrichment.service.ts` - Added optional option holding enrichment with contract multiplier.
+- `src/cli.ts` - Added `--option-quote-provider`.
+- `src/report/ai-json-contract.ts`, `docs/AI_JSON_CONTRACT.md` - Added optional `quoteSource`/`quoteDelay` contract fields.
+- `docs/LONGBRIDGE_INTEGRATION_PLAN.md` - Documented option quote fallback providers and env vars.
+- `test/option-quote-provider.test.ts` - Added option provider and enrichment coverage.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -164,7 +184,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] SDK portfolio: `npm run dev -- --data-provider sdk --longbridge-region cn portfolio --json` passed, returning 24 holdings and risk summary.
 - [x] Real environment check: `longbridge check` passed with token OK, active CN region, CN endpoint 22ms, global endpoint timeout.
 - [x] AI JSON contract: `npm test` passed with 11 files / 41 tests after contract tests were added.
+- [x] Option quote providers: `npm run check` and `npm test` passed with 12 files / 48 tests.
 
 ## Notes for Next Session
 
-All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis reports are structured for AI-facing interpretation, and JSON outputs have documented/tested contracts. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Do not implement automatic trading.

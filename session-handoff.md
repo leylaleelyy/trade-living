@@ -4,7 +4,7 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 11 test files / 41 tests pass, build succeeds).
+3. Run `./init.sh` (expects: 12 test files / 48 tests pass, build succeeds).
 4. Open `feature_list.json` — all tracked features are done.
 5. Check this file and `progress.md` for context.
 
@@ -19,6 +19,26 @@ Longbridge CLI is now behind `TradeLivingDataProvider`/`MarketDataProvider`/`Por
 `report --markdown` and `analyze --markdown` now render structured AI-facing interpretation reports with highlighted conclusions, colored signal badges, icon markers, visual score bars, price ladder, risk warnings, and a trade-plan checklist.
 
 The official Longbridge Node.js SDK is available through `--data-provider sdk`. JSON output contracts are documented in `docs/AI_JSON_CONTRACT.md` and tested with executable Zod schemas.
+
+Option holdings can be enriched through external delayed quote providers when configured with `--option-quote-provider tradier|marketdata|auto`. Enriched option holdings include `quoteSource` and `quoteDelay`.
+
+## What Was Done This Session (2026-05-11 option quotes)
+
+### Option Quote Provider Abstraction
+
+Added `feat-013` after confirming Longbridge option quotes require OPRA access and the current account returns `no quote access`.
+
+1. **Provider contract** — Added `OptionQuoteProvider`, `OptionQuote`, option symbol detection, mark calculation, and composite fallback behavior.
+2. **Tradier adapter** — Converts Longbridge-style option symbols to OCC symbols and parses bid/ask/last, open interest, IV, and Greeks.
+3. **MarketData.app adapter** — Adds 24h-delayed fallback support for option quote snapshots.
+4. **Portfolio enrichment** — `portfolio` can opt into option quote enrichment with `--option-quote-provider`.
+5. **Data quality markers** — Enriched holdings carry `quoteSource` and `quoteDelay`.
+
+### Verification
+
+- `npm run check` — pass.
+- `npm test` — pass, 12 test files / 48 tests.
+- External live quote calls require `TRADIER_TOKEN` or optional `MARKETDATA_TOKEN`; no provider token is configured in this session.
 
 ## What Was Done This Session (2026-05-11 completion)
 

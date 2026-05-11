@@ -56,7 +56,9 @@ export const portfolioJsonContractSchema = z.object({
       marketValue: finiteNumber.optional(),
       unrealizedPnl: finiteNumber.optional(),
       name: z.string().optional(),
-      currency: z.string().optional()
+      currency: z.string().optional(),
+      quoteSource: z.string().optional(),
+      quoteDelay: z.enum(["realtime", "15m", "24h", "unknown"]).optional()
     })
   ),
   risk: z.object({
@@ -69,4 +71,3 @@ export const portfolioJsonContractSchema = z.object({
 
 export type AnalyzeJsonContract = z.infer<typeof analyzeJsonContractSchema>;
 export type PortfolioJsonContract = z.infer<typeof portfolioJsonContractSchema>;
-

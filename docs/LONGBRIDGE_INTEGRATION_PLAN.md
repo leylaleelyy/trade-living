@@ -59,11 +59,34 @@ Authentication order:
 
 The SDK provider uses `QuoteContext` for quotes/K-lines and `TradeContext` for positions. Longbridge CLI remains the default `--live` provider and fallback data source.
 
+## Option Quote Fallbacks
+
+Longbridge supports real-time US option quotes through `longbridge option quote` and SDK `QuoteContext.optionQuote`, but this requires OPRA OpenAPI quote permission. When the account does not have OPRA access, Longbridge returns `no quote access`.
+
+For cost-only option holdings, the portfolio command can optionally try delayed external providers:
+
+```bash
+trade-living --live portfolio --option-quote-provider tradier --json
+trade-living --live portfolio --option-quote-provider marketdata --json
+trade-living --live portfolio --option-quote-provider auto --json
+```
+
+Provider behavior:
+
+| Provider | Env | Delay | Notes |
+|---|---|---|---|
+| `tradier` | `TRADIER_TOKEN` | `15m` for sandbox, `realtime` for live endpoint | Uses OCC symbols and options quote/greeks payloads. |
+| `marketdata` | optional `MARKETDATA_TOKEN` | `24h` by default on free plans | Useful as a low-cost valuation fallback. |
+| `auto` | provider-specific env vars | first successful provider | Tries Tradier, then MarketData.app. |
+
+Enriched option holdings include `marketPrice`, `marketValue`, `unrealizedPnl`, `quoteSource`, and `quoteDelay`. The system keeps this optional so portfolio queries remain reliable when external quote providers are not configured.
+
 ## Done Criteria
 
 - Adapter uses official Longbridge Terminal command names.
 - Schemas parse official quote-style JSON fixtures.
 - CLI supports `--live`, `--longbridge-cli`, and `--start`.
 - CLI supports `--data-provider sdk` for the official Node.js SDK.
+- CLI supports optional `--option-quote-provider` for delayed option holding enrichment.
 - Offline mode remains deterministic and testable.
 - `npm run check`, `npm test`, and `npm run build` pass.

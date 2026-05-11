@@ -3,6 +3,10 @@ import { Command } from "commander";
 import { pathToFileURL } from "node:url";
 import { createDataProvider, type DataProviderKind } from "./adapters/data-provider.factory.js";
 import type { TradeLivingDataProvider } from "./adapters/data-provider.js";
+import {
+  createOptionQuoteProvider,
+  type OptionQuoteProviderKind
+} from "./adapters/option-quote-provider.factory.js";
 import type { KLine } from "./domain/types.js";
 import { calculateForceIndex } from "./indicators/force-index.indicator.js";
 import { latestFinite } from "./indicators/math.js";
@@ -14,6 +18,7 @@ import { calculateMomentumScore } from "./systems/momentum-score.system.js";
 import { evaluateTripleScreen } from "./systems/triple-screen.system.js";
 import { toJsonReport } from "./report/json.reporter.js";
 import { toMarkdownReport } from "./report/markdown.reporter.js";
+import { enrichOptionHoldings } from "./portfolio/option-enrichment.service.js";
 
 type OutputOptions = {
   json?: boolean;
@@ -24,6 +29,7 @@ type OutputOptions = {
   longbridgeCli?: string;
   dataProvider?: DataProviderKind;
   longbridgeRegion?: "cn" | "global";
+  optionQuoteProvider?: OptionQuoteProviderKind;
   start?: string;
 };
 
@@ -73,6 +79,7 @@ export function createProgram(): Command {
     .option("--debug", "include debug details")
     .option("--live", "read market and portfolio data from Longbridge CLI")
     .option("--data-provider <provider>", "data provider: offline, cli, or sdk")
+    .option("--option-quote-provider <provider>", "option quote provider: none, tradier, marketdata, or auto", "none")
     .option("--longbridge-cli <path>", "Longbridge CLI executable path", "longbridge")
     .option("--longbridge-region <region>", "Longbridge region for SDK provider: global or cn")
     .option("--start <date>", "history start date for live K-line data", "2024-01-01");
@@ -82,7 +89,10 @@ export function createProgram(): Command {
     .description("Show portfolio exposure and risk summary")
     .action(async () => {
       const options = program.opts<OutputOptions>();
-      const holdings = await getDataProvider(options).getEnrichedHoldings();
+      const holdings = await enrichOptionHoldings(
+        await getDataProvider(options).getEnrichedHoldings(),
+        createOptionQuoteProvider({ provider: options.optionQuoteProvider })
+      );
       printResult(
         {
           holdings,

@@ -69,8 +69,9 @@ Holding fields:
 | `unrealizedPnl` | number | no | Missing for unsupported option quotes. |
 | `name` | string | no | Broker-provided display name. |
 | `currency` | string | no | Broker-provided currency. |
+| `quoteSource` | string | no | External quote source when an optional quote provider enriches the holding. |
+| `quoteDelay` | enum | no | `realtime`, `15m`, `24h`, or `unknown`. |
 
 ## Validation Source
 
 The executable contract schemas live in `src/report/ai-json-contract.ts` and are covered by `test/ai-json-contract.test.ts`.
-

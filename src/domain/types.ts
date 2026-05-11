@@ -26,6 +26,26 @@ export interface Holding {
   unrealizedPnl?: number;
   name?: string;
   currency?: string;
+  quoteSource?: string;
+  quoteDelay?: "realtime" | "15m" | "24h" | "unknown";
+}
+
+export interface OptionQuote {
+  symbol: string;
+  bid?: number;
+  ask?: number;
+  last?: number;
+  mark?: number;
+  volume?: number;
+  openInterest?: number;
+  impliedVolatility?: number;
+  delta?: number;
+  gamma?: number;
+  theta?: number;
+  vega?: number;
+  source: "longbridge" | "tradier" | "marketdata";
+  delay: "realtime" | "15m" | "24h" | "unknown";
+  timestamp?: number;
 }
 
 export type MarketRegime =

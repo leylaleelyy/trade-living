@@ -95,6 +95,14 @@
       "dependencies": ["feat-007"],
       "status": "done",
       "evidence": "Implemented structured analysis Markdown template with highlighted conclusion, colored signal badges, icon markers, score bars, price ladder, risk warnings, and trade plan checklist. Added markdown reporter test. Verification on 2026-05-11: ./init.sh passed with 8 test files / 22 tests."
+    },
+    {
+      "id": "feat-013",
+      "name": "Option Quote Provider Abstraction",
+      "description": "Add optional external option quote providers for enriching option holdings when Longbridge OPRA access is unavailable, starting with Tradier and MarketData.app delayed-data adapters.",
+      "dependencies": ["feat-008", "feat-011"],
+      "status": "done",
+      "evidence": "Implemented option quote provider contract, Tradier and MarketData.app adapters, auto fallback provider, optional portfolio enrichment via --option-quote-provider, and quoteSource/quoteDelay JSON fields. Verification on 2026-05-11: npm run check and npm test passed with 12 files / 48 tests."
     }
   ]
 }

@@ -183,6 +183,12 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `package.json` - Added npm package publishing metadata, package file allowlist, clean build step, and `prepublishOnly` verification.
 - `package.json` - Applied npm metadata cleanup so the `trade-living` binary points to `dist/cli.js`.
 
+## Files Modified This Session (2026-05-11 release automation)
+
+- `.github/workflows/npm-publish.yml` - Added tag-triggered and manual GitHub Actions workflow for npm publish.
+- `README.md` - Documented `NPM_TOKEN` setup and semver tag release steps.
+- `feature_list.json` - Added and completed `feat-017` Automated npm Release Workflow.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -217,7 +223,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] npm publish preparation: `npm run check`, `npm test`, `npm run build`, and `npm pack --dry-run` passed for `trade-living-cli@0.1.0`.
 - [x] npm package availability: `npm view trade-living-cli version` returned 404, so the package name is currently available.
 - [ ] npm publish: `npm publish --access public` reached `prepublishOnly` successfully but stopped at `ENEEDAUTH`; npm login is required before retrying.
+- [x] Release automation: `./init.sh` passed before the change; `npm run check`, `npm test` (12 files / 52 tests), `npm run build`, and `npm pack --dry-run` passed after adding the GitHub Actions workflow.
 
 ## Notes for Next Session
 
-All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. npm package publishing is prepared and verified, but the actual publish is blocked until npm authentication is completed. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. npm package publishing is prepared and verified, with GitHub Actions automation added for tag-based releases; actual publishing still requires `NPM_TOKEN` in GitHub repository secrets. Do not implement automatic trading.

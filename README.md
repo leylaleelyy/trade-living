@@ -27,3 +27,19 @@ trade-living report
 ```
 
 All commands are expected to support `--json`, `--markdown`, `--pretty`, and `--debug` as the implementation matures.
+
+## Release
+
+Publishing is automated through GitHub Actions.
+
+1. Add an npm automation token as the repository secret `NPM_TOKEN`.
+2. Update `package.json` version.
+3. Commit the version change.
+4. Create and push a matching semver tag:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow verifies type-check, tests, build, and package contents before running `npm publish --access public`.

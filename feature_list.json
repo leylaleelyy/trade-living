@@ -127,6 +127,14 @@
       "dependencies": ["feat-011", "feat-012", "feat-013"],
       "status": "done",
       "evidence": "Added structured portfolio Markdown output with overview, allocation bars, holding details, concentration warning, P/L, and quote quality sections. Verification on 2026-05-11: portfolio --markdown smoke passed and ./init.sh passed with 12 files / 52 tests."
+    },
+    {
+      "id": "feat-017",
+      "name": "Automated npm Release Workflow",
+      "description": "Add GitHub Actions release automation that verifies the package and publishes to npm from semver tags using an npm automation token.",
+      "dependencies": ["feat-014"],
+      "status": "done",
+      "evidence": "Added .github/workflows/npm-publish.yml with tag-triggered and manual dry-run publishing, documented NPM_TOKEN and tag release steps in README. Workflow publishes with npm publish --access public after verification. Verification on 2026-05-11: ./init.sh passed before the change; npm run check, npm test, npm run build, and npm pack --dry-run passed after the change."
     }
   ]
 }

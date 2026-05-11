@@ -204,6 +204,7 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 
 Priority order:
 
-1. **npm publish retry** — Run `npm login` locally, then retry `npm publish --access public`. Publishing preparation is complete and `npm pack --dry-run` is clean for `trade-living-cli@0.1.0`.
-2. **Post-publish verification** — Run `npm view trade-living-cli version` and install/smoke the published CLI package.
-3. **Option quote enrichment** — Investigate additional free or user-configurable option quote sources for LEAPS/options currently shown as cost-only when no provider token is configured.
+1. **Configure npm automation secret** — Add an npm automation token to GitHub repository secrets as `NPM_TOKEN`.
+2. **Tag-based npm publish** — Update `package.json` version, commit it, then push a semver tag such as `v0.1.0` to trigger `.github/workflows/npm-publish.yml`.
+3. **Post-publish verification** — Run `npm view trade-living-cli version` and install/smoke the published CLI package.
+4. **Option quote enrichment** — Investigate additional free or user-configurable option quote sources for LEAPS/options currently shown as cost-only when no provider token is configured.

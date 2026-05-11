@@ -3,14 +3,24 @@
   "version": "0.1.0",
   "description": "Professional trading analysis CLI based on Triple Screen Trading System.",
   "type": "module",
+  "files": [
+    "dist",
+    "docs/AI_JSON_CONTRACT.md",
+    "docs/ARCHITECTURE.md",
+    "docs/PRODUCT.md",
+    "README.md"
+  ],
   "bin": {
     "trade-living": "./dist/cli.js"
   },
   "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "prebuild": "npm run clean",
     "dev": "tsx src/cli.ts",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run check && npm test && npm run build",
     "start": "node dist/cli.js"
   },
   "dependencies": {

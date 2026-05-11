@@ -22,6 +22,23 @@ The official Longbridge Node.js SDK is available through `--data-provider sdk`. 
 
 Option holdings can be enriched through external delayed quote providers when configured with `--option-quote-provider tradier|marketdata|auto`. Enriched option holdings include `quoteSource` and `quoteDelay`.
 
+The repository now ships a project-local Codex skill at `.agents/skills/trade-living-cli` for safe AI invocation and Longbridge preflight validation.
+
+## What Was Done This Session (2026-05-11 skill)
+
+### Codex Skill For AI Invocation
+
+Added `feat-014` so future agents can safely call this CLI without rediscovering environment checks.
+
+1. **Skill instructions** — Added `SKILL.md` covering preflight, provider selection, JSON vs Markdown usage, option quote handling, and failure modes.
+2. **Preflight script** — Added `verify-longbridge-env.sh` to check repository root, Node/npm, `npm run check`, build, Longbridge Terminal, SDK auth, option quote provider tokens, and offline CLI smoke.
+3. **Real environment validation** — Preflight passes against the current Longbridge CN environment.
+
+### Verification
+
+- `bash .agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` — pass.
+- `./init.sh` — pass, 12 test files / 48 tests.
+
 ## What Was Done This Session (2026-05-11 option quotes)
 
 ### Option Quote Provider Abstraction

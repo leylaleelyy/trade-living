@@ -103,6 +103,14 @@
       "dependencies": ["feat-008", "feat-011"],
       "status": "done",
       "evidence": "Implemented option quote provider contract, Tradier and MarketData.app adapters, auto fallback provider, optional portfolio enrichment via --option-quote-provider, and quoteSource/quoteDelay JSON fields. Verification on 2026-05-11: npm run check and npm test passed with 12 files / 48 tests."
+    },
+    {
+      "id": "feat-014",
+      "name": "Codex Skill For AI Invocation",
+      "description": "Add a project-local Codex skill that guides agents through preflight validation, Longbridge environment checks, data provider selection, and AI-safe output usage before calling the CLI.",
+      "dependencies": ["feat-011", "feat-013"],
+      "status": "done",
+      "evidence": "Added .agents/skills/trade-living-cli with SKILL.md and verify-longbridge-env.sh preflight script. Verification on 2026-05-11: skill preflight passed against real Longbridge CN environment and ./init.sh passed with 12 files / 48 tests."
     }
   ]
 }

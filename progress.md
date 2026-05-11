@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:38 Asia/Shanghai
-**Active Feature:** Option quote provider abstraction complete
+**Last Updated:** 2026-05-11 19:48 Asia/Shanghai
+**Active Feature:** Codex skill for AI invocation complete
 
 ## Status
 
@@ -66,6 +66,9 @@
 - [x] Added MarketData.app option quote adapter with 24h delayed fallback support.
 - [x] Added composite option quote provider and optional portfolio enrichment through `--option-quote-provider`.
 - [x] Extended holdings JSON contract with optional `quoteSource` and `quoteDelay` fields.
+- [x] Implemented `feat-014` Codex Skill For AI Invocation.
+- [x] Added project-local `.agents/skills/trade-living-cli/SKILL.md` with preflight, provider selection, AI output, and failure handling guidance.
+- [x] Added `.agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` for repeatable environment checks.
 
 ### What's In Progress
 
@@ -157,6 +160,12 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `docs/LONGBRIDGE_INTEGRATION_PLAN.md` - Documented option quote fallback providers and env vars.
 - `test/option-quote-provider.test.ts` - Added option provider and enrichment coverage.
 
+## Files Modified This Session (2026-05-11 skill)
+
+- `.agents/skills/trade-living-cli/SKILL.md` - Added project-local Codex skill for safe AI invocation of the CLI.
+- `.agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` - Added deterministic preflight script for project, Longbridge, SDK auth, option provider tokens, and CLI smoke checks.
+- `feature_list.json` - Added and completed `feat-014`.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -185,6 +194,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] Real environment check: `longbridge check` passed with token OK, active CN region, CN endpoint 22ms, global endpoint timeout.
 - [x] AI JSON contract: `npm test` passed with 11 files / 41 tests after contract tests were added.
 - [x] Option quote providers: `npm run check` and `npm test` passed with 12 files / 48 tests.
+- [x] Codex skill preflight: `bash .agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` passed against real Longbridge CN environment.
+- [x] Final harness after skill: `./init.sh` passed with 12 files / 48 tests.
 
 ## Notes for Next Session
 

@@ -143,6 +143,14 @@
       "dependencies": ["feat-014", "feat-017"],
       "status": "done",
       "evidence": "Implemented trade-living init and trade-living daemon commands with deterministic setup planning, config writing, token-safe Telegram env handling, OpenAI/Codex availability checks, and pid/log daemon runtime helpers. Verification on 2026-05-12: npm run check, npm test, npm run build, init dry-run JSON smoke, init config write smoke, and daemon status smoke passed."
+    },
+    {
+      "id": "feat-019",
+      "name": "Interactive Init Prompts",
+      "description": "Upgrade trade-living init to support OpenClaw-style step-by-step prompts while keeping non-interactive JSON and yes-mode flows for AI callers.",
+      "dependencies": ["feat-018"],
+      "status": "done",
+      "evidence": "Added promptInitWizardOptions with step-by-step Longbridge, Telegram, model provider, daemon, log, and config questions. CLI now prompts in TTY by default and supports --yes/--no-interactive for automation. Verification on 2026-05-12: npm run check, npm test, npm run build, init --yes JSON dry-run, init --no-interactive JSON dry-run, and ./init.sh passed."
     }
   ]
 }

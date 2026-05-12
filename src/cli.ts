@@ -25,8 +25,10 @@ import {
   formatInitWizardPlan,
   writeInitWizardConfig,
   type ChannelKind,
+  type InitWizardOptions,
   type ModelProviderKind
 } from "./init/init-wizard.js";
+import { promptInitWizardOptions } from "./init/init-prompts.js";
 
 type OutputOptions = {
   json?: boolean;
@@ -55,6 +57,8 @@ type InitCommandOptions = {
   daemonIntervalSeconds?: number;
   logDir?: string;
   dryRun?: boolean;
+  interactive?: boolean;
+  yes?: boolean;
 };
 
 type DaemonCommandOptions = {
@@ -136,19 +140,22 @@ export function createProgram(): Command {
     .option("--json", "output JSON")
     .option("--config-path <path>", "config file path", ".trade-living/config.json")
     .option("--longbridge-cli <path>", "Longbridge CLI executable path", "longbridge")
-    .option("--channel <channel>", "notification channel: none or telegram", parseChannel, "none")
+    .option("--channel <channel>", "notification channel: none or telegram", parseChannel)
     .option("--telegram-bot-token-env <name>", "environment variable that stores the Telegram bot token", "TELEGRAM_BOT_TOKEN")
     .option("--telegram-chat-id <id>", "Telegram chat id")
-    .option("--model-provider <provider>", "model provider: none, openai, or codex", parseModelProvider, "codex")
+    .option("--model-provider <provider>", "model provider: none, openai, or codex", parseModelProvider)
     .option("--model <model>", "model name or alias")
     .option("--daemon", "enable daemon log and pid configuration")
     .option("--daemon-command <command>", "daemon command to run in the background", "trade-living portfolio --json")
     .option("--daemon-interval <seconds>", "daemon command interval in seconds", Number, 300)
     .option("--log-dir <path>", "daemon log directory", ".trade-living/logs")
+    .option("--interactive", "ask setup questions when running in a TTY", true)
+    .option("--no-interactive", "skip setup questions and use defaults/options")
+    .option("--yes", "accept defaults and provided options without prompting")
     .option("--dry-run", "print the setup plan without writing config")
-    .action((options: InitCommandOptions) => {
+    .action(async (options: InitCommandOptions) => {
       const outputJson = Boolean(options.json || program.opts<OutputOptions>().json);
-      const plan = buildInitWizardPlan({
+      const baseOptions: InitWizardOptions = {
         configPath: options.configPath,
         longbridgeCli: options.longbridgeCli,
         channel: options.channel,
@@ -160,7 +167,17 @@ export function createProgram(): Command {
         daemonCommand: options.daemonCommand,
         daemonIntervalSeconds: options.daemonIntervalSeconds,
         logDir: options.logDir
-      });
+      };
+      const shouldPrompt =
+        options.interactive !== false &&
+        !options.yes &&
+        !outputJson &&
+        !options.dryRun &&
+        Boolean(process.stdin.isTTY);
+      const initOptions = shouldPrompt
+        ? await promptInitWizardOptions(baseOptions)
+        : baseOptions;
+      const plan = buildInitWizardPlan(initOptions);
 
       if (!options.dryRun) {
         writeInitWizardConfig(plan);

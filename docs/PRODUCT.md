@@ -16,7 +16,7 @@ It is a probability analysis, risk control, and trade planning system. It is not
 ## Command Surface
 
 - `trade-living portfolio`: portfolio exposure and risk summary.
-- `trade-living init`: first-run setup guide for Longbridge, notification channels, model provider status, and daemon logging.
+- `trade-living init`: interactive first-run setup guide for Longbridge, notification channels, model provider status, and daemon logging; `--yes`, `--dry-run`, and `--json` support automation.
 - `trade-living daemon`: start, stop, and inspect background loops that write pid and log files.
 - `trade-living analyze SYMBOL`: full analysis output.
 - `trade-living momentum SYMBOL`: momentum score.

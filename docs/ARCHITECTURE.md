@@ -31,7 +31,7 @@ Longbridge Adapter
 ## Module Boundaries
 
 - `src/cli.ts`: command registration and argument parsing only.
-- `src/init/`: first-run setup planning, external tool probes, channel/model/daemon config generation.
+- `src/init/`: first-run setup planning, interactive prompts, external tool probes, channel/model/daemon config generation.
 - `src/adapters/`: Longbridge CLI/SDK integration; external calls stay here.
 - `src/market/`: quote, kline, volume, VWAP, support/resistance, and regime services.
 - `src/indicators/`: deterministic indicator calculations.

@@ -205,7 +205,7 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 Priority order:
 
 1. **Configure npm automation secret** — Add an npm automation token to GitHub repository secrets as `NPM_TOKEN`.
-2. **Real init run** — Run `trade-living init --channel telegram --telegram-chat-id <id> --model-provider codex --daemon` after `TELEGRAM_BOT_TOKEN` is exported, then inspect `.trade-living/config.json`.
+2. **Real init run** — Run `trade-living init` in a TTY for step-by-step setup after `TELEGRAM_BOT_TOKEN` is exported, then inspect `.trade-living/config.json`.
 3. **Daemon runtime smoke** — Start a short-interval daemon in a controlled shell, inspect the log file, then stop it with `trade-living daemon stop`.
 4. **Tag-based npm publish** — Update `package.json` version, commit it, then push a semver tag such as `v0.1.0` to trigger `.github/workflows/npm-publish.yml`.
 5. **Post-publish verification** — Run `npm view trade-living-cli version` and install/smoke the published CLI package.

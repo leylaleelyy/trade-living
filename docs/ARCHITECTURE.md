@@ -31,6 +31,7 @@ Longbridge Adapter
 ## Module Boundaries
 
 - `src/cli.ts`: command registration and argument parsing only.
+- `src/init/`: first-run setup planning, external tool probes, channel/model/daemon config generation.
 - `src/adapters/`: Longbridge CLI/SDK integration; external calls stay here.
 - `src/market/`: quote, kline, volume, VWAP, support/resistance, and regime services.
 - `src/indicators/`: deterministic indicator calculations.
@@ -38,6 +39,7 @@ Longbridge Adapter
 - `src/risk/`: position sizing, stops, targets, risk/reward, and portfolio risk.
 - `src/portfolio/`: holdings and account aggregation.
 - `src/report/`: JSON and Markdown output formatting.
+- `src/runtime/`: local runtime helpers such as daemon process management.
 - `src/domain/`: shared domain types.
 - `src/config/`: runtime configuration and validation.
 

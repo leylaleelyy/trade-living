@@ -18,6 +18,9 @@ npm run dev -- analyze AAPL.US --pretty
 
 ```bash
 trade-living portfolio
+trade-living init --channel telegram --telegram-chat-id 123456 --model-provider codex --daemon
+trade-living daemon start --command "trade-living portfolio --json" --interval 300
+trade-living daemon status
 trade-living analyze AAPL.US
 trade-living momentum AAPL.US
 trade-living triple AAPL.US

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Command } from "commander";
+import { Command, InvalidArgumentError } from "commander";
 import { pathToFileURL } from "node:url";
 import { createDataProvider, type DataProviderKind } from "./adapters/data-provider.factory.js";
 import type { TradeLivingDataProvider } from "./adapters/data-provider.js";
@@ -19,6 +19,14 @@ import { evaluateTripleScreen } from "./systems/triple-screen.system.js";
 import { toJsonReport } from "./report/json.reporter.js";
 import { toMarkdownReport } from "./report/markdown.reporter.js";
 import { enrichOptionHoldings } from "./portfolio/option-enrichment.service.js";
+import { getDaemonStatus, startDaemon, stopDaemon } from "./runtime/daemon.service.js";
+import {
+  buildInitWizardPlan,
+  formatInitWizardPlan,
+  writeInitWizardConfig,
+  type ChannelKind,
+  type ModelProviderKind
+} from "./init/init-wizard.js";
 
 type OutputOptions = {
   json?: boolean;
@@ -31,6 +39,30 @@ type OutputOptions = {
   longbridgeRegion?: "cn" | "global";
   optionQuoteProvider?: OptionQuoteProviderKind;
   start?: string;
+};
+
+type InitCommandOptions = {
+  json?: boolean;
+  configPath?: string;
+  longbridgeCli?: string;
+  channel?: ChannelKind;
+  telegramBotTokenEnv?: string;
+  telegramChatId?: string;
+  modelProvider?: ModelProviderKind;
+  model?: string;
+  daemon?: boolean;
+  daemonCommand?: string;
+  daemonIntervalSeconds?: number;
+  logDir?: string;
+  dryRun?: boolean;
+};
+
+type DaemonCommandOptions = {
+  command?: string;
+  interval?: number;
+  logFile?: string;
+  pidFile?: string;
+  json?: boolean;
 };
 
 function printResult(value: unknown, options: OutputOptions, title = "Trade Living") {
@@ -66,6 +98,20 @@ function getWeeklyKLines(dailyKLines: KLine[]): KLine[] {
   return dailyKLines.filter((_, index) => index % 5 === 0);
 }
 
+function parseChannel(value: string): ChannelKind {
+  if (value === "none" || value === "telegram") {
+    return value;
+  }
+  throw new InvalidArgumentError("channel must be none or telegram");
+}
+
+function parseModelProvider(value: string): ModelProviderKind {
+  if (value === "none" || value === "openai" || value === "codex") {
+    return value;
+  }
+  throw new InvalidArgumentError("model provider must be none, openai, or codex");
+}
+
 export function createProgram(): Command {
   const program = new Command();
 
@@ -83,6 +129,92 @@ export function createProgram(): Command {
     .option("--longbridge-cli <path>", "Longbridge CLI executable path", "longbridge")
     .option("--longbridge-region <region>", "Longbridge region for SDK provider: global or cn")
     .option("--start <date>", "history start date for live K-line data", "2024-01-01");
+
+  program
+    .command("init")
+    .description("Guide first-time setup for Longbridge, channels, model provider, and daemon logging")
+    .option("--json", "output JSON")
+    .option("--config-path <path>", "config file path", ".trade-living/config.json")
+    .option("--longbridge-cli <path>", "Longbridge CLI executable path", "longbridge")
+    .option("--channel <channel>", "notification channel: none or telegram", parseChannel, "none")
+    .option("--telegram-bot-token-env <name>", "environment variable that stores the Telegram bot token", "TELEGRAM_BOT_TOKEN")
+    .option("--telegram-chat-id <id>", "Telegram chat id")
+    .option("--model-provider <provider>", "model provider: none, openai, or codex", parseModelProvider, "codex")
+    .option("--model <model>", "model name or alias")
+    .option("--daemon", "enable daemon log and pid configuration")
+    .option("--daemon-command <command>", "daemon command to run in the background", "trade-living portfolio --json")
+    .option("--daemon-interval <seconds>", "daemon command interval in seconds", Number, 300)
+    .option("--log-dir <path>", "daemon log directory", ".trade-living/logs")
+    .option("--dry-run", "print the setup plan without writing config")
+    .action((options: InitCommandOptions) => {
+      const outputJson = Boolean(options.json || program.opts<OutputOptions>().json);
+      const plan = buildInitWizardPlan({
+        configPath: options.configPath,
+        longbridgeCli: options.longbridgeCli,
+        channel: options.channel,
+        telegramBotTokenEnv: options.telegramBotTokenEnv,
+        telegramChatId: options.telegramChatId,
+        modelProvider: options.modelProvider,
+        model: options.model,
+        daemon: options.daemon,
+        daemonCommand: options.daemonCommand,
+        daemonIntervalSeconds: options.daemonIntervalSeconds,
+        logDir: options.logDir
+      });
+
+      if (!options.dryRun) {
+        writeInitWizardConfig(plan);
+      }
+
+      if (outputJson) {
+        console.log(toJsonReport(plan));
+        return;
+      }
+
+      console.log(formatInitWizardPlan(plan));
+    });
+
+  const daemon = program
+    .command("daemon")
+    .description("Run Trade Living commands in the background with pid and log files");
+
+  daemon
+    .command("start")
+    .description("Start a background daemon loop")
+    .option("--command <command>", "command to run repeatedly", "trade-living portfolio --json")
+    .option("--interval <seconds>", "seconds between runs", Number, 300)
+    .option("--log-file <path>", "daemon log file", ".trade-living/logs/trade-living.log")
+    .option("--pid-file <path>", "daemon pid file", ".trade-living/logs/trade-living.pid")
+    .option("--json", "output JSON")
+    .action((options: DaemonCommandOptions) => {
+      const status = startDaemon({
+        command: options.command ?? "trade-living portfolio --json",
+        intervalSeconds: options.interval ?? 300,
+        logFile: options.logFile ?? ".trade-living/logs/trade-living.log",
+        pidFile: options.pidFile ?? ".trade-living/logs/trade-living.pid"
+      });
+      printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
+    });
+
+  daemon
+    .command("status")
+    .description("Show daemon status")
+    .option("--pid-file <path>", "daemon pid file", ".trade-living/logs/trade-living.pid")
+    .option("--json", "output JSON")
+    .action((options: DaemonCommandOptions) => {
+      const status = getDaemonStatus(options.pidFile ?? ".trade-living/logs/trade-living.pid");
+      printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
+    });
+
+  daemon
+    .command("stop")
+    .description("Stop a background daemon loop")
+    .option("--pid-file <path>", "daemon pid file", ".trade-living/logs/trade-living.pid")
+    .option("--json", "output JSON")
+    .action((options: DaemonCommandOptions) => {
+      const status = stopDaemon(options.pidFile ?? ".trade-living/logs/trade-living.pid");
+      printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
+    });
 
   program
     .command("portfolio")

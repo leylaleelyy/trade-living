@@ -189,6 +189,16 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `README.md` - Documented `NPM_TOKEN` setup and semver tag release steps.
 - `feature_list.json` - Added and completed `feat-017` Automated npm Release Workflow.
 
+## Files Modified This Session (2026-05-12 guided init)
+
+- `src/init/init-wizard.ts` - Added deterministic init plan generation, Longbridge checks, Telegram channel config, model provider status, and config writing.
+- `src/runtime/daemon.service.ts` - Added daemon loop, pid-file status, start, and stop helpers.
+- `src/cli.ts` - Added `init` and `daemon start/status/stop` command surfaces.
+- `test/init-wizard.test.ts`, `test/daemon.service.test.ts`, `test/cli.test.ts` - Added coverage for setup planning, daemon helpers, and command registration.
+- `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `README.md` - Documented guided init and daemon commands.
+- `.gitignore` - Ignored local generated init/runtime and Codex run artifacts.
+- `feature_list.json` - Added and completed `feat-018`.
+
 ## Evidence of Completion
 
 - [x] Install: `npm install` completed.
@@ -224,7 +234,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] npm package availability: `npm view trade-living-cli version` returned 404, so the package name is currently available.
 - [ ] npm publish: `npm publish --access public` reached `prepublishOnly` successfully but stopped at `ENEEDAUTH`; npm login is required before retrying.
 - [x] Release automation: `./init.sh` passed before the change; `npm run check`, `npm test` (12 files / 52 tests), `npm run build`, and `npm pack --dry-run` passed after adding the GitHub Actions workflow.
+- [x] Guided init and daemon: `npm run check`, `npm test` (14 files / 57 tests), `npm run build`, `npm run dev -- init --json --dry-run --channel telegram --telegram-chat-id 123456 --model-provider codex --daemon`, `npm run dev -- init --config-path /private/tmp/trade-living-init/config.json --log-dir /private/tmp/trade-living-init/logs --channel telegram --telegram-chat-id 123456 --model-provider openai --daemon`, and `npm run dev -- daemon status --pid-file /private/tmp/trade-living-init/missing.pid --json` passed on 2026-05-12.
 
 ## Notes for Next Session
 
-All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. npm package publishing is prepared and verified, with GitHub Actions automation added for tag-based releases; actual publishing still requires `NPM_TOKEN` in GitHub repository secrets. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Guided initialization now covers Longbridge, Telegram, OpenAI/Codex provider status, and daemon log/pid setup. npm package publishing is prepared and verified, with GitHub Actions automation added for tag-based releases; actual publishing still requires `NPM_TOKEN` in GitHub repository secrets. Do not implement automatic trading.

@@ -7,6 +7,8 @@ describe("trade-living cli", () => {
     const commandNames = program.commands.map((command) => command.name());
 
     expect(commandNames).toEqual([
+      "init",
+      "daemon",
       "portfolio",
       "analyze",
       "momentum",

@@ -46,11 +46,11 @@ function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string
     "",
     "| 模块 | 状态 | 解读 |",
     "|---|---:|---|",
-    `| ${icon("trend")} 市场状态 | ${badge(formatRegime(analysis.marketRegime), regimeColor(analysis.marketRegime))} | ${regimeNarrative(analysis.marketRegime)} |`,
+    `| ${icon("trend")} Market Regime（市场状态） | ${badge(formatRegime(analysis.marketRegime), regimeColor(analysis.marketRegime))} | ${regimeNarrative(analysis.marketRegime)} |`,
     `| ${icon("momentum")} 动量 | ${badge(String(analysis.momentum.score), scoreColor(analysis.momentum.score))} | ${scoreNarrative(analysis.momentum.score)} |`,
-    `| ${icon("triple")} Triple Screen | ${badge(analysis.tripleScreen.decision, decisionColor(analysis.tripleScreen.decision))} | ${decisionNarrative(analysis.tripleScreen.decision)} |`,
+    `| ${icon("triple")} Triple Screen（三重滤网） | ${badge(formatDecision(analysis.tripleScreen.decision), decisionColor(analysis.tripleScreen.decision))} | ${decisionNarrative(analysis.tripleScreen.decision)} |`,
     `| ${icon("quality")} 交易质量 | ${badge(`${analysis.tradeQuality.grade} / ${analysis.tradeQuality.score}`, qualityColor(analysis.tradeQuality.grade))} | ${qualityNarrative(analysis.tradeQuality.grade)} |`,
-    `| ${icon("risk")} 最佳 RR | ${badge(formatNumber(bestTarget.rr), rrColor(bestTarget.rr))} | ${rrNarrative(bestTarget.rr)} |`,
+    `| ${icon("risk")} RR（风险收益比） | ${badge(formatNumber(bestTarget.rr), rrColor(bestTarget.rr))} | ${rrNarrative(bestTarget.rr)} |`,
     "",
     "## 视觉评分",
     "",
@@ -66,7 +66,7 @@ function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string
     `| ${icon("stop")} 止损 | ${formatNumber(analysis.tradePlan.stop)} | 失效位置 |`,
     ...analysis.tradePlan.targets.map(
       (target, index) =>
-        `| ${icon("target")} 目标 ${index + 1} | ${formatNumber(target.price)} | RR ${badge(formatNumber(target.rr), rrColor(target.rr))} |`
+        `| ${icon("target")} 目标 ${index + 1} | ${formatNumber(target.price)} | RR（风险收益比） ${badge(formatNumber(target.rr), rrColor(target.rr))} |`
     ),
     ...levelRows("阻力", analysis.resistances),
     "",
@@ -74,15 +74,15 @@ function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string
     "",
     "## 背离与风险",
     "",
-    `- ${icon("divergence")} MACD 背离：${badge(analysis.divergence.macd, divergenceColor(analysis.divergence.macd))}`,
-    `- ${icon("divergence")} Force Index 背离：${badge(analysis.divergence.forceIndex, divergenceColor(analysis.divergence.forceIndex))}`,
+    `- ${icon("divergence")} MACD（移动平均收敛/发散）背离：${badge(formatDivergence(analysis.divergence.macd), divergenceColor(analysis.divergence.macd))}`,
+    `- ${icon("divergence")} Force Index（强力指数）背离：${badge(formatDivergence(analysis.divergence.forceIndex), divergenceColor(analysis.divergence.forceIndex))}`,
     ...warningRows(analysis.warnings),
     "",
     "## 交易计划模板",
     "",
     `1. 只在 ${highlight(formatNumber(analysis.tradePlan.entryZone[0]), "#2563eb")} - ${highlight(formatNumber(analysis.tradePlan.entryZone[1]), "#2563eb")} 区间内寻找确认。`,
     `2. 跌破 ${highlight(formatNumber(analysis.tradePlan.stop), "#dc2626")} 后计划失效。`,
-    `3. 优先观察 ${highlight(formatNumber(bestTarget.price), "#16a34a")} 目标，当前最佳 RR 为 ${highlight(formatNumber(bestTarget.rr), rrColor(bestTarget.rr))}。`,
+    `3. 优先观察 ${highlight(formatNumber(bestTarget.price), "#16a34a")} 目标，当前最佳 RR（风险收益比）为 ${highlight(formatNumber(bestTarget.rr), rrColor(bestTarget.rr))}。`,
     "",
     "> 说明：本报告只做分析和交易计划质量评估，不构成自动交易指令。"
   ];
@@ -116,7 +116,7 @@ function toPortfolioMarkdownReport(title: string, portfolio: PortfolioReport): s
     "| 指标 | 数值 | 解读 |",
     "|---|---:|---|",
     `| ${icon("portfolio")} 已计价市值 | ${money(totalMarketValue)} | ${pricedHoldings.length}/${portfolio.holdings.length} 个持仓有市值 |`,
-    `| ${icon("quality")} 未实现盈亏 | ${badge(`${money(portfolio.risk.totalUnrealizedPnl)} (${formatNumber(pnlPct)}%)`, pnlColor(portfolio.risk.totalUnrealizedPnl))} | ${pnlNarrative(portfolio.risk.totalUnrealizedPnl)} |`,
+    `| ${icon("quality")} Unrealized P/L（未实现盈亏） | ${badge(`${money(portfolio.risk.totalUnrealizedPnl)} (${formatNumber(pnlPct)}%)`, pnlColor(portfolio.risk.totalUnrealizedPnl))} | ${pnlNarrative(portfolio.risk.totalUnrealizedPnl)} |`,
     `| ${icon("risk")} 最大单一持仓 | ${badge(`${formatNumber(portfolio.risk.maxSinglePositionPct)}%`, concentrationColor(portfolio.risk.maxSinglePositionPct))} | ${concentrationNarrative(portfolio.risk.maxSinglePositionPct)} |`,
     `| ${icon("warning")} 未计价持仓 | ${badge(String(unpricedHoldings.length), unpricedHoldings.length ? "#d97706" : "#16a34a")} | ${unpricedHoldings.length ? "需要补充报价或保守估值。" : "报价覆盖完整。"} |`,
     "",
@@ -126,7 +126,7 @@ function toPortfolioMarkdownReport(title: string, portfolio: PortfolioReport): s
     "",
     "## 持仓明细",
     "",
-    "| 标的 | 数量 | 均价 | 市价 | 市值 | 盈亏 | 占比 | 数据质量 |",
+    "| 标的 | 数量 | 均价 | 市价 | 市值 | P/L（盈亏） | 占比 | 数据质量 |",
     "|---|---:|---:|---:|---:|---:|---:|---|",
     ...sorted.map((holding) => holdingRow(holding, totalMarketValue)),
     "",
@@ -238,7 +238,7 @@ function allocationBars(holdings: Holding[], totalMarketValue: number): string {
       return `${holding.symbol.padEnd(22, " ")} ${scoreBar(Math.min(100, pct * 5))} ${formatNumber(pct)}%`;
     });
 
-  return ["```text", "Top allocations", ...rows, "```"].join("\n");
+  return ["```text", "Top allocations（主要配置）", ...rows, "```"].join("\n");
 }
 
 function holdingRow(holding: Holding, totalMarketValue: number): string {
@@ -247,10 +247,10 @@ function holdingRow(holding: Holding, totalMarketValue: number): string {
       ? `${formatNumber((holding.marketValue / totalMarketValue) * 100)}%`
       : "n/a";
   const quality = holding.quoteSource
-    ? `${holding.quoteSource}/${holding.quoteDelay ?? "unknown"}`
+    ? `${holding.quoteSource}/${formatQuoteDelay(holding.quoteDelay)}`
     : holding.marketPrice !== undefined
-      ? "priced"
-      : "cost-only";
+      ? "priced（已计价）"
+      : "cost-only（仅成本价）";
 
   return [
     `| ${holding.symbol}`,
@@ -323,7 +323,53 @@ function formatNumber(value: number): string {
 }
 
 function formatRegime(regime: AnalyzeResult["marketRegime"]): string {
-  return regime.replaceAll("_", " ");
+  const labels: Record<AnalyzeResult["marketRegime"], string> = {
+    trending_bull: "trending bull（趋势多头）",
+    trending_bear: "trending bear（趋势空头）",
+    range: "range（区间震荡）",
+    volatile: "volatile（高波动）",
+    compression: "compression（波动压缩）"
+  };
+
+  return labels[regime];
+}
+
+function formatDecision(decision: AnalyzeResult["tripleScreen"]["decision"]): string {
+  const labels: Record<AnalyzeResult["tripleScreen"]["decision"], string> = {
+    buy_watch: "buy watch（买入观察）",
+    sell_watch: "sell watch（卖出观察）",
+    avoid: "avoid（回避）",
+    neutral: "neutral（中性）"
+  };
+
+  return labels[decision];
+}
+
+function formatDivergence(divergence: string): string {
+  const labels: Record<string, string> = {
+    none: "none（无）",
+    bullish: "bullish（看涨）",
+    bearish: "bearish（看跌）"
+  };
+
+  return labels[divergence] ?? divergence;
+}
+
+function formatLevelType(type: string): string {
+  const labels: Record<string, string> = {
+    swing_high: "swing high（摆动高点）",
+    swing_low: "swing low（摆动低点）",
+    ma50: "MA50（50日均线）",
+    ma200: "MA200（200日均线）"
+  };
+
+  return labels[type] ?? type;
+}
+
+function formatQuoteDelay(delay: string | undefined): string {
+  if (delay === "realtime") return "realtime（实时）";
+  if (delay === "delayed") return "delayed（延迟）";
+  return "unknown（未知）";
 }
 
 function decideAction(analysis: AnalyzeResult, bestRr: number): { label: string; color: string; reason: string } {
@@ -331,7 +377,7 @@ function decideAction(analysis: AnalyzeResult, bestRr: number): { label: string;
     return {
       label: "回避",
       color: "#dc2626",
-      reason: "系统质量或 Triple Screen 已经进入回避状态，优先保护本金。"
+      reason: "系统质量或 Triple Screen（三重滤网）已经进入回避状态，优先保护本金。"
     };
   }
 
@@ -443,7 +489,7 @@ function levelRows(label: "支撑" | "阻力", levels: SupportResistanceLevel[])
   const marker = label === "支撑" ? "支撑" : "阻力";
   return levels.slice(0, 5).map((level) => {
     const levelIcon = label === "支撑" ? "▔" : "▁";
-    return `| ${levelIcon} ${marker} | ${formatNumber(level.price)} | ${level.type}, strength ${level.strength} |`;
+    return `| ${levelIcon} ${marker} | ${formatNumber(level.price)} | ${formatLevelType(level.type)}, strength（强度） ${level.strength} |`;
   });
 }
 
@@ -476,5 +522,13 @@ function warningRows(warnings: string[]): string[] {
     return [`- ${icon("warning")} 风险提示：${badge("暂无系统警告", "#16a34a")}`];
   }
 
-  return warnings.map((warning) => `- ${icon("warning")} 风险提示：${badge(warning, "#dc2626")}`);
+  return warnings.map((warning) => `- ${icon("warning")} 风险提示：${badge(formatWarning(warning), "#dc2626")}`);
+}
+
+function formatWarning(warning: string): string {
+  const labels: Record<string, string> = {
+    "Risk/reward is below the preferred threshold.": "Risk/reward is below the preferred threshold.（风险收益比低于偏好阈值。）"
+  };
+
+  return labels[warning] ?? warning;
 }

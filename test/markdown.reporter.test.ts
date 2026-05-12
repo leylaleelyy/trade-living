@@ -12,6 +12,12 @@ describe("markdown reporter", () => {
     expect(markdown).toContain("**重点结论：");
     expect(markdown).toContain('<span style="color:');
     expect(markdown).toContain("## 信号总览");
+    expect(markdown).toContain("Market Regime（市场状态）");
+    expect(markdown).toContain("Triple Screen（三重滤网）");
+    expect(markdown).toContain("RR（风险收益比）");
+    expect(markdown).toContain("MACD（移动平均收敛/发散）");
+    expect(markdown).toContain("Force Index（强力指数）");
+    expect(markdown).toMatch(/trending bull（趋势多头）|trending bear（趋势空头）|range（区间震荡）|volatile（高波动）|compression（波动压缩）/);
     expect(markdown).toContain("## 视觉评分");
     expect(markdown).toContain("▰");
     expect(markdown).toContain("## 价格地图");
@@ -51,7 +57,11 @@ describe("markdown reporter", () => {
     expect(markdown).toContain("**组合重点：");
     expect(markdown).toContain("## 组合总览");
     expect(markdown).toContain("## 配置视图");
-    expect(markdown).toContain("Top allocations");
+    expect(markdown).toContain("Top allocations（主要配置）");
+    expect(markdown).toContain("Unrealized P/L（未实现盈亏）");
+    expect(markdown).toContain("P/L（盈亏）");
+    expect(markdown).toContain("priced（已计价）");
+    expect(markdown).toContain("cost-only（仅成本价）");
     expect(markdown).toContain("## 持仓明细");
     expect(markdown).toContain("## 报价质量");
     expect(markdown).toContain("PLTR270115C150000.US");

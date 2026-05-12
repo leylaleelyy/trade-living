@@ -159,6 +159,14 @@
       "dependencies": ["feat-018", "feat-019"],
       "status": "done",
       "evidence": "Added Telegram notification adapter, config/env resolution, output sanitization/chunking, and --notify-channel telegram CLI support. Verification on 2026-05-12: npm run check, npm test, npm run build, and CLI markdown smoke passed."
+    },
+    {
+      "id": "feat-021",
+      "name": "Bilingual Report Indicator Labels",
+      "description": "Add Chinese translations in parentheses for English indicators and status labels in human-readable reports.",
+      "dependencies": ["feat-012", "feat-016"],
+      "status": "done",
+      "evidence": "Updated Markdown reports to render English indicators/status labels with Chinese translations, including Market Regime, Triple Screen, RR, MACD, Force Index, P/L, Top allocations, support/resistance level types, quote quality, and known English warnings. Verification on 2026-05-12: npm run check, npm test, npm run build, analyze markdown smoke, and portfolio markdown smoke passed."
     }
   ]
 }

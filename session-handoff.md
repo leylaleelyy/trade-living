@@ -4,7 +4,7 @@
 
 1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 12 test files / 52 tests pass, build succeeds).
+3. Run `./init.sh` (expects: 16 test files / 62 tests pass, build succeeds).
 4. Open `feature_list.json` — all tracked features are done.
 5. Check this file and `progress.md` for context.
 
@@ -12,17 +12,23 @@
 
 **All tracked features are complete and validated.**
 
-The CLI supports 7 commands (`analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), all working in both offline (sample data) and live (`--live`) modes.
+The CLI supports 9 command groups (`init`, `daemon`, `analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), with analysis commands working in both offline (sample data) and live (`--live`) modes.
 
 Longbridge CLI is now behind `TradeLivingDataProvider`/`MarketDataProvider`/`PortfolioDataProvider` contracts, so command and service code no longer depends directly on Longbridge CLI implementation details.
 
 `report --markdown` and `analyze --markdown` now render structured AI-facing interpretation reports with highlighted conclusions, colored signal badges, icon markers, visual score bars, price ladder, risk warnings, and a trade-plan checklist.
+
+English report indicators and statuses include Chinese translations in parentheses, for example `Triple Screen（三重滤网）`, `RR（风险收益比）`, `MACD（移动平均收敛/发散）`, and `Force Index（强力指数）`.
 
 The official Longbridge Node.js SDK is available through `--data-provider sdk`. JSON output contracts are documented in `docs/AI_JSON_CONTRACT.md` and tested with executable Zod schemas.
 
 Option holdings can be enriched through external delayed quote providers when configured with `--option-quote-provider tradier|marketdata|auto`. Enriched option holdings include `quoteSource` and `quoteDelay`.
 
 The repository now ships a project-local Codex skill at `.agents/skills/trade-living-cli` for safe AI invocation and Longbridge preflight validation.
+
+`trade-living init` supports interactive first-run setup for Longbridge, Telegram, model provider, daemon logging, and config writing. Analysis output can be explicitly sent to Telegram with `--notify-channel telegram`.
+
+The npm package has been published as `trade-living-cli@0.1.2`; package contents include the compiled `dist/` output.
 
 ## What Was Done This Session (2026-05-11 enhancements)
 
@@ -204,9 +210,9 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 
 Priority order:
 
-1. **Configure npm automation secret** — Add an npm automation token to GitHub repository secrets as `NPM_TOKEN`.
+1. **Credential rotation** — Rotate any npm or Telegram tokens that were pasted into chat, then store active tokens in environment variables or GitHub Secrets only.
 2. **Real init run** — Run `trade-living init` in a TTY for step-by-step setup after `TELEGRAM_BOT_TOKEN` is exported, then inspect `.trade-living/config.json`.
-3. **Daemon runtime smoke** — Start a short-interval daemon in a controlled shell, inspect the log file, then stop it with `trade-living daemon stop`.
-4. **Tag-based npm publish** — Update `package.json` version, commit it, then push a semver tag such as `v0.1.0` to trigger `.github/workflows/npm-publish.yml`.
-5. **Post-publish verification** — Run `npm view trade-living-cli version` and install/smoke the published CLI package.
+3. **Telegram notification smoke** — With `TELEGRAM_BOT_TOKEN` and chat id configured, run `trade-living --notify-channel telegram --markdown analyze AAPL.US` and confirm the report arrives.
+4. **Daemon runtime smoke** — Start a short-interval daemon in a controlled shell, inspect the log file, then stop it with `trade-living daemon stop`.
+5. **Published package smoke** — Install or run `trade-living-cli@0.1.2` from npm and verify `trade-living --help`.
 6. **Option quote enrichment** — Investigate additional free or user-configurable option quote sources for LEAPS/options currently shown as cost-only when no provider token is configured.

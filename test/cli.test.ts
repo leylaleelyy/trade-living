@@ -18,5 +18,6 @@ describe("trade-living cli", () => {
       "report"
     ]);
     expect(program.options.map((option) => option.long).sort()).toContain("--live");
+    expect(program.options.map((option) => option.long).sort()).toContain("--notify-channel");
   });
 });

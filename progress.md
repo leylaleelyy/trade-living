@@ -193,12 +193,22 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 
 - `src/init/init-wizard.ts` - Added deterministic init plan generation, Longbridge checks, Telegram channel config, model provider status, and config writing.
 - `src/init/init-prompts.ts` - Added OpenClaw-style step-by-step init prompts.
+- `src/notify/telegram.service.ts` - Added Telegram target resolution, plain-text sanitization, chunking, and bot API sender.
 - `src/runtime/daemon.service.ts` - Added daemon loop, pid-file status, start, and stop helpers.
-- `src/cli.ts` - Added `init` and `daemon start/status/stop` command surfaces.
-- `test/init-wizard.test.ts`, `test/init-prompts.test.ts`, `test/daemon.service.test.ts`, `test/cli.test.ts` - Added coverage for setup planning, interactive prompt collection, daemon helpers, and command registration.
+- `src/cli.ts` - Added `init`, `daemon start/status/stop`, and `--notify-channel telegram` command surfaces.
+- `test/init-wizard.test.ts`, `test/init-prompts.test.ts`, `test/telegram.service.test.ts`, `test/daemon.service.test.ts`, `test/cli.test.ts` - Added coverage for setup planning, interactive prompt collection, Telegram notifications, daemon helpers, and command registration.
 - `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `README.md` - Documented guided init and daemon commands.
 - `.gitignore` - Ignored local generated init/runtime and Codex run artifacts.
 - `feature_list.json` - Added and completed `feat-018`.
+
+## Non-Product Artifact This Session (2026-05-12 Cocoa Codex Pet)
+
+- Created Cocoa, a Codex pet based on the supplied gray poodle photo.
+- Run directory: `/Users/bytedance/Documents/trade-living/.codex-hatch-runs/cocoa`.
+- Installed pet package: `/Users/bytedance/.codex/pets/cocoa`.
+- Generated and recorded base, idle, running-right, waving, jumping, failed, waiting, running, and review rows with `$imagegen`; `running-left` was derived by mirroring `running-right` after visual review because the pet has no text, logo, handed prop, or one-sided marking.
+- QA outputs: `final/spritesheet.webp`, `final/validation.json`, `qa/review.json`, and `qa/contact-sheet.png`.
+- Video previews were skipped because `ffmpeg` is not installed in the current environment.
 
 ## Evidence of Completion
 
@@ -237,7 +247,8 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] Release automation: `./init.sh` passed before the change; `npm run check`, `npm test` (12 files / 52 tests), `npm run build`, and `npm pack --dry-run` passed after adding the GitHub Actions workflow.
 - [x] Guided init and daemon: `npm run check`, `npm test` (14 files / 57 tests), `npm run build`, `npm run dev -- init --json --dry-run --channel telegram --telegram-chat-id 123456 --model-provider codex --daemon`, `npm run dev -- init --config-path /private/tmp/trade-living-init/config.json --log-dir /private/tmp/trade-living-init/logs --channel telegram --telegram-chat-id 123456 --model-provider openai --daemon`, and `npm run dev -- daemon status --pid-file /private/tmp/trade-living-init/missing.pid --json` passed on 2026-05-12.
 - [x] Interactive init prompts: `npm run check`, `npm test` (15 files / 59 tests), `npm run build`, `npm run dev -- init --yes --json --dry-run --channel telegram --telegram-chat-id 123456 --model-provider codex --daemon`, `npm run dev -- init --no-interactive --json --dry-run`, and `./init.sh` passed on 2026-05-12.
+- [x] Telegram analysis notifications: `npm run check`, `npm test` (16 files / 62 tests), `npm run build`, `npm run dev -- --markdown analyze AAPL.US`, and `npm run dev -- --notify-channel none --markdown report AAPL.US` passed on 2026-05-12.
 
 ## Notes for Next Session
 
-All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Guided initialization now supports interactive prompts plus non-interactive AI/script flows for Longbridge, Telegram, OpenAI/Codex provider status, and daemon log/pid setup. npm package publishing is prepared and verified, with GitHub Actions automation added for tag-based releases; actual publishing still requires `NPM_TOKEN` in GitHub repository secrets. Do not implement automatic trading.
+All tracked features in `feature_list.json` are complete. Live Longbridge integration has both CLI and SDK provider paths behind the provider interface. Markdown analysis and portfolio reports are structured for AI-facing interpretation, JSON outputs have documented/tested contracts, and option holding enrichment can use external delayed providers when configured. Guided initialization now supports interactive prompts plus non-interactive AI/script flows for Longbridge, Telegram, OpenAI/Codex provider status, and daemon log/pid setup. Analysis output can be explicitly sent to Telegram with `--notify-channel telegram`. npm package publishing is prepared and verified, with GitHub Actions automation added for tag-based releases; actual publishing still requires `NPM_TOKEN` in GitHub repository secrets. Do not implement automatic trading.

@@ -32,6 +32,10 @@ All commands should converge on these output modes:
 - `--pretty`
 - `--debug`
 
+Analysis commands can optionally send the generated output to Telegram with
+`--notify-channel telegram` when a bot token environment variable and chat id
+are configured.
+
 ## Milestones
 
 1. CLI foundation.

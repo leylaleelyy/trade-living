@@ -39,6 +39,7 @@ Longbridge Adapter
 - `src/risk/`: position sizing, stops, targets, risk/reward, and portfolio risk.
 - `src/portfolio/`: holdings and account aggregation.
 - `src/report/`: JSON and Markdown output formatting.
+- `src/notify/`: outbound notification adapters such as Telegram.
 - `src/runtime/`: local runtime helpers such as daemon process management.
 - `src/domain/`: shared domain types.
 - `src/config/`: runtime configuration and validation.

@@ -29,6 +29,10 @@ import {
   type ModelProviderKind
 } from "./init/init-wizard.js";
 import { promptInitWizardOptions } from "./init/init-prompts.js";
+import {
+  resolveTelegramTarget,
+  sendTelegramMessage
+} from "./notify/telegram.service.js";
 
 type OutputOptions = {
   json?: boolean;
@@ -41,6 +45,10 @@ type OutputOptions = {
   longbridgeRegion?: "cn" | "global";
   optionQuoteProvider?: OptionQuoteProviderKind;
   start?: string;
+  notifyChannel?: ChannelKind;
+  telegramBotTokenEnv?: string;
+  telegramChatId?: string;
+  configPath?: string;
 };
 
 type InitCommandOptions = {
@@ -69,13 +77,28 @@ type DaemonCommandOptions = {
   json?: boolean;
 };
 
-function printResult(value: unknown, options: OutputOptions, title = "Trade Living") {
+function formatResult(value: unknown, options: OutputOptions, title = "Trade Living"): string {
   if (options.markdown) {
-    console.log(toMarkdownReport(title, asRows(value)));
-    return;
+    return toMarkdownReport(title, asRows(value));
   }
 
-  console.log(toJsonReport(value));
+  return toJsonReport(value);
+}
+
+async function printResult(value: unknown, options: OutputOptions, title = "Trade Living") {
+  const output = formatResult(value, options, title);
+  console.log(output);
+
+  if (options.notifyChannel === "telegram") {
+    await sendTelegramMessage(
+      resolveTelegramTarget({
+        configPath: options.configPath,
+        telegramBotTokenEnv: options.telegramBotTokenEnv,
+        telegramChatId: options.telegramChatId
+      }),
+      output
+    );
+  }
 }
 
 function asRows(value: unknown): Record<string, unknown> {
@@ -132,6 +155,10 @@ export function createProgram(): Command {
     .option("--option-quote-provider <provider>", "option quote provider: none, tradier, marketdata, or auto", "none")
     .option("--longbridge-cli <path>", "Longbridge CLI executable path", "longbridge")
     .option("--longbridge-region <region>", "Longbridge region for SDK provider: global or cn")
+    .option("--config-path <path>", "Trade Living config file path", ".trade-living/config.json")
+    .option("--notify-channel <channel>", "send command output to channel: none or telegram", parseChannel, "none")
+    .option("--telegram-bot-token-env <name>", "environment variable that stores the Telegram bot token")
+    .option("--telegram-chat-id <id>", "Telegram chat id")
     .option("--start <date>", "history start date for live K-line data", "2024-01-01");
 
   program
@@ -203,14 +230,14 @@ export function createProgram(): Command {
     .option("--log-file <path>", "daemon log file", ".trade-living/logs/trade-living.log")
     .option("--pid-file <path>", "daemon pid file", ".trade-living/logs/trade-living.pid")
     .option("--json", "output JSON")
-    .action((options: DaemonCommandOptions) => {
+    .action(async (options: DaemonCommandOptions) => {
       const status = startDaemon({
         command: options.command ?? "trade-living portfolio --json",
         intervalSeconds: options.interval ?? 300,
         logFile: options.logFile ?? ".trade-living/logs/trade-living.log",
         pidFile: options.pidFile ?? ".trade-living/logs/trade-living.pid"
       });
-      printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
+      await printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
     });
 
   daemon
@@ -218,9 +245,9 @@ export function createProgram(): Command {
     .description("Show daemon status")
     .option("--pid-file <path>", "daemon pid file", ".trade-living/logs/trade-living.pid")
     .option("--json", "output JSON")
-    .action((options: DaemonCommandOptions) => {
+    .action(async (options: DaemonCommandOptions) => {
       const status = getDaemonStatus(options.pidFile ?? ".trade-living/logs/trade-living.pid");
-      printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
+      await printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
     });
 
   daemon
@@ -228,9 +255,9 @@ export function createProgram(): Command {
     .description("Stop a background daemon loop")
     .option("--pid-file <path>", "daemon pid file", ".trade-living/logs/trade-living.pid")
     .option("--json", "output JSON")
-    .action((options: DaemonCommandOptions) => {
+    .action(async (options: DaemonCommandOptions) => {
       const status = stopDaemon(options.pidFile ?? ".trade-living/logs/trade-living.pid");
-      printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
+      await printResult(status, { json: options.json ?? program.opts<OutputOptions>().json }, "Daemon");
     });
 
   program
@@ -242,7 +269,7 @@ export function createProgram(): Command {
         await getDataProvider(options).getEnrichedHoldings(),
         createOptionQuoteProvider({ provider: options.optionQuoteProvider })
       );
-      printResult(
+      await printResult(
         {
           holdings,
           risk: calculatePortfolioRisk(holdings)
@@ -259,7 +286,7 @@ export function createProgram(): Command {
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
       const analysis = analyzeKLines(symbol, await getDailyKLines(symbol, options));
-      printResult(analysis, options, `Analysis ${symbol}`);
+      await printResult(analysis, options, `Analysis ${symbol}`);
     });
 
   program
@@ -270,7 +297,7 @@ export function createProgram(): Command {
       const options = program.opts<OutputOptions>();
       const klines = await getDailyKLines(symbol, options);
       const triple = evaluateTripleScreen(getWeeklyKLines(klines), klines);
-      printResult(
+      await printResult(
         { symbol, ...calculateMomentumScore(klines, triple) },
         options,
         `Momentum ${symbol}`
@@ -284,7 +311,7 @@ export function createProgram(): Command {
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
       const klines = await getDailyKLines(symbol, options);
-      printResult(
+      await printResult(
         { symbol, ...evaluateTripleScreen(getWeeklyKLines(klines), klines) },
         options,
         `Triple Screen ${symbol}`
@@ -298,7 +325,7 @@ export function createProgram(): Command {
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
       const force = calculateForceIndex(await getDailyKLines(symbol, options));
-      printResult(
+      await printResult(
         {
           symbol,
           latestRaw: latestFinite(force.raw),
@@ -318,7 +345,7 @@ export function createProgram(): Command {
     .requiredOption("--equity <number>", "account equity", Number)
     .option("--target <number>", "target price", Number)
     .description("Calculate risk/reward and position sizing inputs")
-    .action((symbol: string, options: { entry: number; stop: number; equity: number; target?: number }) => {
+    .action(async (symbol: string, options: { entry: number; stop: number; equity: number; target?: number }) => {
       const target = options.target ?? options.entry + (options.entry - options.stop) * 2;
       const rr = calculateRiskReward(options.entry, options.stop, target);
       const position = calculatePositionSize({
@@ -327,7 +354,7 @@ export function createProgram(): Command {
         equity: options.equity
       });
 
-      printResult(
+      await printResult(
         {
           symbol,
           entry: options.entry,
@@ -350,7 +377,7 @@ export function createProgram(): Command {
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
       const analysis = analyzeKLines(symbol, await getDailyKLines(symbol, options));
-      printResult(
+      await printResult(
         analysis,
         { ...options, markdown: options.markdown || (!options.json && !options.pretty) },
         `Trade Living Report ${symbol}`

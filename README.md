@@ -24,6 +24,7 @@ trade-living init --yes --json --dry-run --channel telegram --telegram-chat-id 1
 trade-living daemon start --command "trade-living portfolio --json" --interval 300
 trade-living daemon status
 trade-living analyze AAPL.US
+trade-living --notify-channel telegram --markdown analyze AAPL.US
 trade-living momentum AAPL.US
 trade-living triple AAPL.US
 trade-living force AAPL.US

@@ -151,6 +151,14 @@
       "dependencies": ["feat-018"],
       "status": "done",
       "evidence": "Added promptInitWizardOptions with step-by-step Longbridge, Telegram, model provider, daemon, log, and config questions. CLI now prompts in TTY by default and supports --yes/--no-interactive for automation. Verification on 2026-05-12: npm run check, npm test, npm run build, init --yes JSON dry-run, init --no-interactive JSON dry-run, and ./init.sh passed."
+    },
+    {
+      "id": "feat-020",
+      "name": "Telegram Analysis Notifications",
+      "description": "Allow analysis command outputs to be sent to a configured Telegram bot/channel when explicitly requested.",
+      "dependencies": ["feat-018", "feat-019"],
+      "status": "done",
+      "evidence": "Added Telegram notification adapter, config/env resolution, output sanitization/chunking, and --notify-channel telegram CLI support. Verification on 2026-05-12: npm run check, npm test, npm run build, and CLI markdown smoke passed."
     }
   ]
 }

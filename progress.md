@@ -182,6 +182,7 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 
 - `package.json` - Added npm package publishing metadata, package file allowlist, clean build step, and `prepublishOnly` verification.
 - `package.json` - Applied npm metadata cleanup so the `trade-living` binary points to `dist/cli.js`.
+- `.npmignore` - Added explicit npm packaging ignore rules so ignored `dist/` build output is still included through the package `files` allowlist.
 
 ## Files Modified This Session (2026-05-11 release automation)
 
@@ -248,6 +249,7 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] Final harness after skill: `./init.sh` passed with 12 files / 48 tests.
 - [x] Reliability/report enhancements: `npm run dev -- portfolio --markdown` produced structured portfolio report; `./init.sh` passed with 12 files / 52 tests.
 - [x] npm publish preparation: `npm run check`, `npm test`, `npm run build`, and `npm pack --dry-run` passed for `trade-living-cli@0.1.0`.
+- [x] npm package content fix: `npm pack --dry-run` includes `dist` output after adding `.npmignore`; tarball dry-run reports 143 files, package size 55.5 kB, unpacked size 254.7 kB.
 - [x] npm package availability: `npm view trade-living-cli version` returned 404, so the package name is currently available.
 - [ ] npm publish: `npm publish --access public` reached `prepublishOnly` successfully but stopped at `ENEEDAUTH`; npm login is required before retrying.
 - [x] Release automation: `./init.sh` passed before the change; `npm run check`, `npm test` (12 files / 52 tests), `npm run build`, and `npm pack --dry-run` passed after adding the GitHub Actions workflow.

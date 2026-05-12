@@ -1,0 +1,17 @@
+src/
+test/
+node_modules/
+coverage/
+.agents/
+.github/
+.trade-living/
+.codex-*-runs/
+.env
+*.log
+tsconfig.json
+tsconfig.build.json
+vitest.config.ts
+feature_list.json
+progress.md
+session-handoff.md
+AGENTS.md

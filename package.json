@@ -1,6 +1,6 @@
 {
   "name": "trade-living-cli",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Professional trading analysis CLI based on Triple Screen Trading System.",
   "type": "module",
   "files": [

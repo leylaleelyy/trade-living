@@ -1,4 +1,11 @@
 import type { AnalyzeResult, Holding, SupportResistanceLevel } from "../domain/types.js";
+import {
+  formatPositionNote,
+  formatTradeQuality,
+  formatTrend,
+  formatWarning as formatWarningWithChinese,
+  riskRewardNarrative
+} from "./analyze-interpretation.js";
 
 export function toMarkdownReport(
   title: string,
@@ -48,14 +55,36 @@ function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string
     "|---|---:|---|",
     `| ${icon("trend")} Market Regime（市场状态） | ${badge(formatRegime(analysis.marketRegime), regimeColor(analysis.marketRegime))} | ${regimeNarrative(analysis.marketRegime)} |`,
     `| ${icon("momentum")} 动量 | ${badge(String(analysis.momentum.score), scoreColor(analysis.momentum.score))} | ${scoreNarrative(analysis.momentum.score)} |`,
-    `| ${icon("triple")} Triple Screen（三重滤网） | ${badge(formatDecision(analysis.tripleScreen.decision), decisionColor(analysis.tripleScreen.decision))} | ${decisionNarrative(analysis.tripleScreen.decision)} |`,
-    `| ${icon("quality")} 交易质量 | ${badge(`${analysis.tradeQuality.grade} / ${analysis.tradeQuality.score}`, qualityColor(analysis.tradeQuality.grade))} | ${qualityNarrative(analysis.tradeQuality.grade)} |`,
+    `| ${icon("triple")} Triple Screen（三重滤网） | ${badge(formatDecision(analysis.tripleScreen.decision), decisionColor(analysis.tripleScreen.decision))} | ${tripleScreenNarrative(analysis)} |`,
+    `| ${icon("quality")} 交易质量 | ${badge(`${formatTradeQuality(analysis.tradeQuality.grade)} / ${analysis.tradeQuality.score}`, qualityColor(analysis.tradeQuality.grade))} | ${qualityNarrative(analysis.tradeQuality.grade)} |`,
     `| ${icon("risk")} RR（风险收益比） | ${badge(formatNumber(bestTarget.rr), rrColor(bestTarget.rr))} | ${rrNarrative(bestTarget.rr)} |`,
+    "",
+    "## 三重滤网状态",
+    "",
+    "| 层级 | 状态 | 解读 |",
+    "|---|---:|---|",
+    `| ${icon("trend")} 月线趋势 | ${badge(formatTrend(analysis.tripleScreen.monthlyTrend), trendColor(analysis.tripleScreen.monthlyTrend))} | 长周期方向过滤器。 |`,
+    `| ${icon("trend")} 周线趋势 | ${badge(formatTrend(analysis.tripleScreen.weeklyTrend), trendColor(analysis.tripleScreen.weeklyTrend))} | 中周期顺势确认。 |`,
+    `| ${icon("entry")} 日线回调 | ${badge(formatBooleanStatus(analysis.tripleScreen.pullback), analysis.tripleScreen.pullback ? "#16a34a" : "#d97706")} | 是否出现顺势回调窗口。 |`,
+    `| ${icon("target")} 日线触发 | ${badge(formatBooleanStatus(analysis.tripleScreen.trigger), analysis.tripleScreen.trigger ? "#16a34a" : "#d97706")} | 是否出现突破/放量触发。 |`,
+    "",
+    "## RR 分析",
+    "",
+    `当前最佳 RR（风险收益比）为 ${badge(formatNumber(bestTarget.rr), rrColor(bestTarget.rr))}，${riskRewardNarrative(bestTarget.rr)}`,
+    "",
+    "| 目标 | 价格 | RR | 解读 |",
+    "|---|---:|---:|---|",
+    ...analysis.tradePlan.targets.map(
+      (target, index) =>
+        `| 目标 ${index + 1} | ${formatNumber(target.price)} | ${badge(formatNumber(target.rr), rrColor(target.rr))} | ${riskRewardNarrative(target.rr)} |`
+    ),
     "",
     "## 视觉评分",
     "",
     `- 动量强度 ${scoreBar(analysis.momentum.score)} ${analysis.momentum.score}/100`,
     `- 交易质量 ${scoreBar(analysis.tradeQuality.score)} ${analysis.tradeQuality.score}/100`,
+    "",
+    ...positionContextSection(analysis),
     "",
     "## 价格地图",
     "",
@@ -88,6 +117,28 @@ function toAnalyzeMarkdownReport(title: string, analysis: AnalyzeResult): string
   ];
 
   return `${sections.join("\n")}\n`;
+}
+
+function positionContextSection(analysis: AnalyzeResult): string[] {
+  if (!analysis.position) return [];
+
+  const position = analysis.position;
+  const holding = position.holding;
+  return [
+    "## 持仓上下文",
+    "",
+    "| 指标 | 数值 | 解读 |",
+    "|---|---:|---|",
+    `| ${icon("portfolio")} 持仓数量 | ${formatNumber(holding.quantity)} | 当前账户已持有该标的 |`,
+    `| ${icon("entry")} 平均成本 | ${money(holding.avgCost)} | 成本基准 |`,
+    `| ${icon("quality")} 成本总额 | ${money(position.costBasis)} | 持仓成本口径 |`,
+    `| ${icon("momentum")} 当前市值 | ${position.marketValue === undefined ? "n/a" : money(position.marketValue)} | ${position.portfolioWeightPct === undefined ? "组合占比未知" : `组合占比 ${formatNumber(position.portfolioWeightPct)}%`} |`,
+    `| ${icon("risk")} Unrealized P/L（未实现盈亏） | ${position.unrealizedPnl === undefined ? "n/a" : badge(`${money(position.unrealizedPnl)} (${formatOptionalPct(position.unrealizedPnlPct)})`, pnlColor(position.unrealizedPnl))} | ${positionNarrative(position.unrealizedPnl)} |`,
+    `| ${icon("stop")} 到止损风险 | ${position.riskToStop === undefined ? "n/a" : `${money(position.riskToStop)} (${formatOptionalPct(position.riskToStopPct)})`} | 按当前持仓和分析止损估算 |`,
+    "",
+    ...position.notes.map((note) => `- ${icon("warning")} ${formatPositionNote(note)}`),
+    ""
+  ];
 }
 
 function toPortfolioMarkdownReport(title: string, portfolio: PortfolioReport): string {
@@ -297,6 +348,17 @@ function pnlNarrative(value: number): string {
   return "组合盈亏接近持平。";
 }
 
+function positionNarrative(value: number | undefined): string {
+  if (value === undefined) return "持仓盈亏未知。";
+  if (value > 0) return "该持仓当前为浮盈，重点管理回撤和止盈纪律。";
+  if (value < 0) return "该持仓当前为浮亏，避免在低质量信号下摊低成本。";
+  return "该持仓接近成本线。";
+}
+
+function formatOptionalPct(value: number | undefined): string {
+  return value === undefined ? "n/a" : `${formatNumber(value)}%`;
+}
+
 function concentrationColor(value: number): string {
   if (value >= 25) return "#dc2626";
   if (value >= 15) return "#d97706";
@@ -349,7 +411,8 @@ function formatDivergence(divergence: string): string {
   const labels: Record<string, string> = {
     none: "none（无）",
     bullish: "bullish（看涨）",
-    bearish: "bearish（看跌）"
+    bearish: "bearish（看跌）",
+    bearish_hidden: "bearish hidden（隐性看跌）"
   };
 
   return labels[divergence] ?? divergence;
@@ -423,6 +486,12 @@ function decisionColor(decision: AnalyzeResult["tripleScreen"]["decision"]): str
   return "#d97706";
 }
 
+function trendColor(trend: string): string {
+  if (trend === "bullish") return "#16a34a";
+  if (trend === "bearish") return "#dc2626";
+  return "#d97706";
+}
+
 function qualityColor(grade: AnalyzeResult["tradeQuality"]["grade"]): string {
   if (grade === "A+" || grade === "A") return "#16a34a";
   if (grade === "B") return "#d97706";
@@ -469,6 +538,20 @@ function decisionNarrative(decision: AnalyzeResult["tripleScreen"]["decision"]):
   };
 
   return narratives[decision];
+}
+
+function tripleScreenNarrative(analysis: AnalyzeResult): string {
+  return [
+    decisionNarrative(analysis.tripleScreen.decision),
+    `月线 ${formatTrend(analysis.tripleScreen.monthlyTrend)}`,
+    `周线 ${formatTrend(analysis.tripleScreen.weeklyTrend)}`,
+    `日线回调 ${formatBooleanStatus(analysis.tripleScreen.pullback)}`,
+    `日线触发 ${formatBooleanStatus(analysis.tripleScreen.trigger)}`
+  ].join("；");
+}
+
+function formatBooleanStatus(value: boolean): string {
+  return value ? "yes（是）" : "no（否）";
 }
 
 function qualityNarrative(grade: AnalyzeResult["tradeQuality"]["grade"]): string {
@@ -526,9 +609,5 @@ function warningRows(warnings: string[]): string[] {
 }
 
 function formatWarning(warning: string): string {
-  const labels: Record<string, string> = {
-    "Risk/reward is below the preferred threshold.": "Risk/reward is below the preferred threshold.（风险收益比低于偏好阈值。）"
-  };
-
-  return labels[warning] ?? warning;
+  return formatWarningWithChinese(warning);
 }

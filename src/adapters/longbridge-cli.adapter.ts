@@ -39,7 +39,7 @@ export class LongbridgeCliAdapter implements TradeLivingDataProvider {
 
   async getKLines(symbol: string, request: KLineRequest = {}): Promise<KLine[]> {
     const args = request.start
-      ? ["kline", "history", symbol, "--start", request.start]
+      ? ["kline", "history", symbol, "--start", request.start, "--period", request.period ?? "day"]
       : ["kline", symbol, "--period", request.period ?? "day"];
 
     if (request.adjust) {

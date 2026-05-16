@@ -2,8 +2,8 @@
 
 ## Current State
 
-**Last Updated:** 2026-05-11 19:54 Asia/Shanghai
-**Active Feature:** Reliability and portfolio report enhancements complete
+**Last Updated:** 2026-05-16 16:10 Asia/Shanghai
+**Active Feature:** feat-026 Triple Screen Five-Factor Timeframe Lattice selected as the next implementation target
 
 ## Status
 
@@ -77,12 +77,13 @@
 
 ### What's In Progress
 
-Nothing in progress. All tracked features in `feature_list.json` are done and validated.
+No code implementation is in progress. The feature backlog has been expanded from the Alexander Elder Triple Screen technical plan, and `feat-026` is the selected next feature when implementation resumes.
 
 ### What's Next
 
-1. Configure a real `TRADIER_TOKEN` or `MARKETDATA_TOKEN` to enable external option quote enrichment in live portfolio runs.
-2. Consider adding sector/benchmark relative strength once a reliable benchmark data source is selected.
+1. Implement `feat-026` by making the intermediate/long/short timeframe lattice explicit and testable.
+2. Then implement `feat-027` to replace the current trend shortcut with Elder Impulse EMA26 slope plus MACD histogram slope states.
+3. Continue through `feat-028` to `feat-034` to cover wave filtering, EMA penetration entries, 2%/6% risk gates, exits, divergence scanning, trade sheets, and impulse visualization.
 
 ## Blockers / Risks
 
@@ -208,6 +209,77 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - `test/markdown.reporter.test.ts` - Added regression coverage for bilingual report labels.
 - `feature_list.json` - Added and completed `feat-021`.
 
+## Maintenance This Session (2026-05-15 preflight path)
+
+- `.agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` - Replaced the hard-coded historical checkout path with the script-derived repository root.
+- `.agents/skills/trade-living-cli/SKILL.md` and `session-handoff.md` - Updated restart/preflight instructions to refer to the current checkout instead of an absolute user-specific path.
+
+## Files Modified This Session (2026-05-15 Munger skill)
+
+- `.agents/skills/munger-perspective/` - Added the public GitHub `alchaincyf/munger-skill` as a project-local skill, including `SKILL.md`, MIT `LICENSE`, `references/`, and `examples/`.
+- `feature_list.json` - Added and completed `feat-022` for the Munger Perspective Skill integration.
+- `session-handoff.md` - Documented the new project-local skill and how it should combine with Trade Living CLI analysis.
+
+## Files Modified This Session (2026-05-15 position-aware analysis)
+
+- `src/portfolio/position-context.service.ts` - Added matched-holding detection and position-aware risk context for analysis outputs.
+- `src/cli.ts` - `analyze` and `report` now query holdings and attach position context when the symbol is held.
+- `src/domain/types.ts`, `src/report/ai-json-contract.ts`, and `docs/AI_JSON_CONTRACT.md` - Added optional `position` output contract fields.
+- `src/report/markdown.reporter.ts` - Added a held-position section to analysis Markdown reports.
+- `test/position-context.test.ts`, `test/ai-json-contract.test.ts`, and `test/markdown.reporter.test.ts` - Added focused coverage for position context and contract validation.
+- `feature_list.json` - Added and completed `feat-023`.
+
+## Files Modified This Session (2026-05-16 bilingual status/conclusion)
+
+- `src/report/analyze-interpretation.ts` - Added shared Chinese conclusion, status narrative, warning, and position-note translations for analysis output.
+- `src/report/json.reporter.ts` and `src/report/ai-json-contract.ts` - Added optional `interpretation` JSON layer and executable contract validation.
+- `src/report/markdown.reporter.ts` - Added Chinese trade-quality labels and translated position-management notes.
+- `docs/PRODUCT.md` and `docs/AI_JSON_CONTRACT.md` - Documented bilingual interpretation output.
+- `test/ai-json-contract.test.ts` and `test/markdown.reporter.test.ts` - Added coverage for Chinese status/conclusion fields and translated notes.
+- `feature_list.json` - Added and completed `feat-024`.
+
+## Files Modified This Session (2026-05-16 strict triple screen)
+
+- `src/cli.ts` - Default `--start` now resolves to one year before runtime; `analyze`, `report`, `momentum`, and `triple` fetch real day/week/month K-lines where needed.
+- `src/systems/triple-screen.system.ts` and `src/systems/setup-engine.ts` - Added strict monthly/weekly trend confirmation, exposed monthly/weekly trend, daily pullback/trigger, and Triple Screen score in analysis output.
+- `src/adapters/longbridge-cli.adapter.ts` - Historical K-line calls now pass `--period` even when `--start` is provided, allowing real weekly/monthly history.
+- `src/report/markdown.reporter.ts` and `src/report/analyze-interpretation.ts` - Added Triple Screen status and RR analysis explanations with Chinese labels.
+- `src/domain/types.ts`, `src/report/ai-json-contract.ts`, and `docs/AI_JSON_CONTRACT.md` - Documented the expanded Triple Screen and RR interpretation fields.
+- `test/systems.test.ts`, `test/longbridge-cli.adapter.test.ts`, `test/ai-json-contract.test.ts`, and `test/markdown.reporter.test.ts` - Added coverage for strict timeframes, period propagation, and report/contract output.
+- `feature_list.json` - Added and completed `feat-025`.
+
+## Files Modified This Session (2026-05-16 Elder Triple Screen backlog)
+
+- `feature_list.json` - Added `feat-026` through `feat-034` as pending features based on the supplied Alexander Elder Triple Screen technical plan.
+- `progress.md` - Recorded the implementation gap analysis and selected `feat-026` as the next single unfinished feature.
+- `session-handoff.md` - Updated restart notes and next-action context for the expanded Triple Screen roadmap.
+
+### Elder Triple Screen Gap Analysis
+
+Existing coverage:
+
+- Real daily, weekly, and monthly K-lines are available for `analyze`, `report`, `momentum`, and `triple`.
+- Reports already include Chinese Triple Screen state labels and RR analysis.
+- Existing risk modules support 2% single-trade sizing, stops, targets, RR grading, portfolio summaries, and position-aware analysis.
+- Current analysis has Force Index EMA2/EMA13, RSI, ATR, MACD, support/resistance, divergence primitives, and 0-100 trade quality scoring.
+
+Identified gaps now tracked as features:
+
+- `feat-026` - Five-factor timeframe lattice and explicit short/intermediate/long timeframe resolution.
+- `feat-027` - Elder Impulse market tide filter using EMA26 slope plus MACD histogram slope, with green/red/blue action rules.
+- `feat-028` - First-class intermediate wave pullback filter with Force Index EMA2, RSI, and optional stochastic rules.
+- `feat-029` - Average EMA Penetration entry planner and trailing stop entry alternative.
+- `feat-030` - 2% single-trade and 6% aggregate open-risk gates integrated with holdings.
+- `feat-031` - Exit strategy planner for impulse-color exits, auto-envelope/channel targets, and ATR partial exits.
+- `feat-032` - MACD divergence scanner with A-bottom/B-top alert workflow.
+- `feat-033` - Elder-style trade sheet and 7/10 minimum score gate.
+- `feat-034` - Reusable impulse visualization and conditional formatting output.
+
+### Verification
+
+- `./init.sh` passed on 2026-05-16 before backlog edits: npm install, `npm run check`, `npm test` with 17 files / 66 tests, and `npm run build`.
+- Post-edit validation: `node -e "JSON.parse(require('node:fs').readFileSync('feature_list.json','utf8')); console.log('ok')"` passed.
+
 ## Non-Product Artifact This Session (2026-05-12 Cocoa Codex Pet)
 
 - Created Cocoa, a Codex pet based on the supplied gray poodle photo.
@@ -257,6 +329,11 @@ Nothing in progress. All tracked features in `feature_list.json` are done and va
 - [x] Interactive init prompts: `npm run check`, `npm test` (15 files / 59 tests), `npm run build`, `npm run dev -- init --yes --json --dry-run --channel telegram --telegram-chat-id 123456 --model-provider codex --daemon`, `npm run dev -- init --no-interactive --json --dry-run`, and `./init.sh` passed on 2026-05-12.
 - [x] Telegram analysis notifications: `npm run check`, `npm test` (16 files / 62 tests), `npm run build`, `npm run dev -- --markdown analyze AAPL.US`, and `npm run dev -- --notify-channel none --markdown report AAPL.US` passed on 2026-05-12.
 - [x] Bilingual report labels: `npm run check`, `npm test` (16 files / 62 tests), `npm run build`, `npm run dev -- --markdown analyze AAPL.US`, and `npm run dev -- portfolio --markdown` passed on 2026-05-12.
+- [x] Preflight path fix: `npm run check`, `npm test` (16 files / 62 tests), `npm run build`, and `bash .agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh` passed on 2026-05-15.
+- [x] Munger skill integration: `.agents/skills/munger-perspective/SKILL.md` frontmatter inspected, source license preserved, and `npm run check` passed on 2026-05-15.
+- [x] Position-aware analysis: `./init.sh` passed on 2026-05-15, covering `npm run check`, full `npm test`, and `npm run build`; CLI smoke for held/non-held symbols and Markdown report output also passed.
+- [x] Bilingual status/conclusion interpretation: `npm run check`, `npm test`, `npm run build`, `./init.sh`, and JSON/Markdown CLI smokes passed on 2026-05-16.
+- [x] Strict Triple Screen timeframes: `npm run check`, `npm test`, focused systems/contract/Markdown/Longbridge adapter tests, `npm run build`, offline JSON/Markdown/triple smokes, and live AAPL analyze smoke passed on 2026-05-16.
 
 ## Notes for Next Session
 

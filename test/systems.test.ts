@@ -47,7 +47,11 @@ describe("analysis systems", () => {
   });
 
   it("evaluates triple screen", () => {
-    expect(evaluateTripleScreen(fixtureKLines, fixtureKLines).trend).toBe("bullish");
+    const result = evaluateTripleScreen(fixtureKLines, fixtureKLines);
+
+    expect(result.trend).toBe("bullish");
+    expect(result.monthlyTrend).toBe("bullish");
+    expect(result.weeklyTrend).toBe("bullish");
   });
 
   it("calculates position sizing", () => {
@@ -63,6 +67,8 @@ describe("analysis systems", () => {
       calculateTradeQuality({
         tripleScreen: {
           trend: "bullish",
+          monthlyTrend: "bullish",
+          weeklyTrend: "bullish",
           pullback: true,
           trigger: true,
           decision: "buy_watch",
@@ -91,6 +97,8 @@ describe("analysis systems", () => {
     const analysis = analyzeKLines("AAPL.US", fixtureKLines);
 
     expect(analysis.symbol).toBe("AAPL.US");
+    expect(analysis.tripleScreen.monthlyTrend).toBeDefined();
+    expect(analysis.tripleScreen.weeklyTrend).toBeDefined();
     expect(analysis.tradePlan.targets.length).toBeGreaterThan(0);
     expect(analysis.tradeQuality.score).toBeGreaterThan(0);
   });

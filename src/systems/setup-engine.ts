@@ -17,7 +17,12 @@ import { createSampleKLines } from "../market/sample-data.js";
 
 export function createOfflineAnalysis(symbol: string): AnalyzeResult {
   const dailyKLines = createSampleKLines();
-  return analyzeKLines(symbol, dailyKLines, dailyKLines.filter((_, index) => index % 5 === 0));
+  return analyzeKLines(
+    symbol,
+    dailyKLines,
+    sampleKLinesByInterval(dailyKLines, 5),
+    sampleKLinesByInterval(dailyKLines, 21)
+  );
 }
 
 export const createPlaceholderAnalysis = createOfflineAnalysis;
@@ -25,14 +30,15 @@ export const createPlaceholderAnalysis = createOfflineAnalysis;
 export function analyzeKLines(
   symbol: string,
   dailyKLines: KLine[],
-  weeklyKLines = dailyKLines
+  weeklyKLines = dailyKLines,
+  monthlyKLines = weeklyKLines
 ): AnalyzeResult {
   const latest = dailyKLines.at(-1);
   if (!latest) {
     throw new Error("At least one kline is required for analysis.");
   }
 
-  const tripleScreen = evaluateTripleScreen(weeklyKLines, dailyKLines);
+  const tripleScreen = evaluateTripleScreen(weeklyKLines, dailyKLines, monthlyKLines);
   const momentum = calculateMomentumScore(dailyKLines, tripleScreen);
   const marketRegime = detectMarketRegime(dailyKLines);
   const structure = findSupportResistanceLevels(dailyKLines, latest.close);
@@ -64,7 +70,13 @@ export function analyzeKLines(
     symbol,
     marketRegime,
     tripleScreen: {
-      decision: tripleScreen.decision
+      decision: tripleScreen.decision,
+      trend: tripleScreen.trend,
+      monthlyTrend: tripleScreen.monthlyTrend,
+      weeklyTrend: tripleScreen.weeklyTrend,
+      pullback: tripleScreen.pullback,
+      trigger: tripleScreen.trigger,
+      score: tripleScreen.score
     },
     momentum: {
       score: momentum.score
@@ -98,3 +110,7 @@ function buildWarnings(
 }
 
 export { createSampleKLines };
+
+function sampleKLinesByInterval(klines: KLine[], interval: number): KLine[] {
+  return klines.filter((_, index) => index % interval === 0);
+}

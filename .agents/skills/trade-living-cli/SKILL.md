@@ -13,7 +13,7 @@ Trade Living CLI is analysis-only. Never place orders or add automatic trade exe
 
 Before live analysis or portfolio queries:
 
-1. Confirm repository root is `/Users/bytedance/Documents/trade-living`.
+1. Confirm repository root is the current Trade Living checkout.
 2. Run the project baseline:
    ```bash
    ./init.sh
@@ -55,4 +55,3 @@ npm run dev -- --live portfolio --option-quote-provider auto --json
 - If SDK mode lacks API key env vars, it can reuse a single OAuth token cache under `~/.longbridge/openapi/tokens`.
 - If no option provider token is configured, leave option holdings cost-only and say so.
 - Keep Longbridge access behind adapters; do not import Longbridge SDK in domain, systems, indicators, or risk modules.
-

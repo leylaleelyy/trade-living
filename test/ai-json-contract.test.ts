@@ -20,6 +20,38 @@ describe("AI JSON contract", () => {
       tripleScreen: {
         decision: expect.any(String)
       },
+      interpretation: {
+        conclusion: {
+          label: expect.any(String),
+          reason: expect.any(String)
+        },
+        statuses: {
+          marketRegime: {
+            zh: expect.any(String),
+            narrative: expect.any(String)
+          },
+          tripleScreen: {
+            zh: expect.any(String),
+            narrative: expect.any(String)
+          },
+          tradeQuality: {
+            zh: expect.any(String),
+            narrative: expect.any(String)
+          },
+          monthlyTrend: {
+            zh: expect.any(String),
+            narrative: expect.any(String)
+          },
+          weeklyTrend: {
+            zh: expect.any(String),
+            narrative: expect.any(String)
+          },
+          riskReward: {
+            zh: expect.any(String),
+            narrative: expect.any(String)
+          }
+        }
+      },
       momentum: {
         score: expect.any(Number)
       },
@@ -28,6 +60,37 @@ describe("AI JSON contract", () => {
         stop: expect.any(Number)
       }
     });
+    expect(parsed.interpretation.statuses.marketRegime.label).toContain("（");
+    expect(parsed.interpretation.statuses.riskReward.label).toContain("（");
+    expect(parsed.interpretation.conclusion.reason).toContain("。");
+  });
+
+  it("validates analyze JSON output with optional position context", () => {
+    const parsed = analyzeJsonContractSchema.parse({
+      ...analyzeKLines("AAPL.US", fixtureKLines),
+      position: {
+        status: "held",
+        holding: {
+          symbol: "AAPL.US",
+          quantity: 10,
+          avgCost: 190,
+          marketPrice: 210,
+          marketValue: 2100,
+          unrealizedPnl: 200
+        },
+        costBasis: 1900,
+        marketValue: 2100,
+        unrealizedPnl: 200,
+        unrealizedPnlPct: 10.53,
+        portfolioWeightPct: 15.2,
+        priceVsCostPct: 10.53,
+        riskToStop: 120,
+        riskToStopPct: 5.71,
+        notes: ["Existing holding detected; evaluate this as position management."]
+      }
+    });
+
+    expect(parsed.position?.status).toBe("held");
   });
 
   it("validates portfolio JSON output", () => {
@@ -69,4 +132,3 @@ describe("AI JSON contract", () => {
     expect(parsed.holdings[0].marketPrice).toBeUndefined();
   });
 });
-

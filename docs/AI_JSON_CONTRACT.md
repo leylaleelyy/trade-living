@@ -20,6 +20,10 @@ trade-living analyze SYMBOL --json
 trade-living report SYMBOL --json
 ```
 
+When no `--start` is provided, live analysis defaults to a one-year lookback
+from the current runtime date. Triple Screen fields are based on real daily,
+weekly, and monthly K-lines when the selected provider supports them.
+
 Required top-level fields:
 
 | Field | Type | Notes |
@@ -27,6 +31,12 @@ Required top-level fields:
 | `symbol` | string | Requested market symbol. |
 | `marketRegime` | enum | `trending_bull`, `trending_bear`, `range`, `volatile`, `compression`. |
 | `tripleScreen.decision` | enum | `buy_watch`, `sell_watch`, `avoid`, `neutral`. |
+| `tripleScreen.trend` | enum | Optional. Strict Triple Screen trend after monthly and weekly confirmation: `bullish`, `bearish`, `neutral`. |
+| `tripleScreen.monthlyTrend` | enum | Optional. Monthly trend filter. |
+| `tripleScreen.weeklyTrend` | enum | Optional. Weekly trend filter from real weekly K-lines. |
+| `tripleScreen.pullback` | boolean | Optional. Daily pullback condition. |
+| `tripleScreen.trigger` | boolean | Optional. Daily trigger condition. |
+| `tripleScreen.score` | number | Optional. Composite Triple Screen score. |
 | `momentum.score` | number | 0-100 style score. |
 | `supports[]` | array | Support/resistance level objects. |
 | `resistances[]` | array | Support/resistance level objects. |
@@ -38,6 +48,41 @@ Required top-level fields:
 | `tradeQuality.score` | number | Composite quality score. |
 | `tradeQuality.grade` | enum | `A+`, `A`, `B`, `C`, `Avoid`. |
 | `warnings[]` | string[] | Analysis warnings. |
+| `position` | object | Optional. Present only when the analyzed symbol matches an account holding. |
+| `interpretation` | object | Optional bilingual interpretation layer for AI/user display. |
+
+Optional `position` fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `status` | enum | Currently `held`. |
+| `holding` | object | The matched normalized holding. |
+| `costBasis` | number | `avgCost * quantity`. |
+| `marketValue` | number | Optional current holding value. |
+| `unrealizedPnl` | number | Optional current unrealized P/L. |
+| `unrealizedPnlPct` | number | Optional unrealized P/L divided by cost basis. |
+| `portfolioWeightPct` | number | Optional current holding weight in priced portfolio value. |
+| `priceVsCostPct` | number | Optional price distance from average cost. |
+| `riskToStop` | number | Optional estimated loss to the analysis stop for the current quantity. |
+| `riskToStopPct` | number | Optional `riskToStop` divided by current market value. |
+| `notes[]` | string[] | Position-aware risk and management notes. |
+
+Optional `interpretation` fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `conclusion.label` | string | Chinese conclusion label, e.g. `回避`, `重点跟踪`, `强势但等待触发`, `普通观察`. |
+| `conclusion.reason` | string | Chinese reason for the conclusion. |
+| `statuses.marketRegime` | object | Original value plus bilingual label, Chinese label, and Chinese narrative. |
+| `statuses.tripleScreen` | object | Original value plus bilingual label, Chinese label, and Chinese narrative. |
+| `statuses.tradeQuality` | object | Original value plus bilingual label, Chinese label, and Chinese narrative. |
+| `statuses.macdDivergence` | object | Original value plus bilingual label, Chinese label, and Chinese narrative. |
+| `statuses.forceIndexDivergence` | object | Original value plus bilingual label, Chinese label, and Chinese narrative. |
+| `statuses.monthlyTrend` | object | Optional monthly trend explanation. |
+| `statuses.weeklyTrend` | object | Optional weekly trend explanation. |
+| `statuses.riskReward` | object | Optional best-RR explanation. |
+| `warningsZh[]` | string[] | Warnings with Chinese explanations appended. |
+| `positionNotesZh[]` | string[] | Position notes with Chinese explanations appended, present when position notes exist. |
 
 ## Portfolio JSON
 

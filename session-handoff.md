@@ -2,15 +2,16 @@
 
 ## Restart Path
 
-1. Run `pwd` and confirm the repository is `/Users/bytedance/Documents/trade-living`.
+1. Run `pwd` and confirm the repository is the current Trade Living checkout.
 2. Read `AGENTS.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md`.
-3. Run `./init.sh` (expects: 16 test files / 62 tests pass, build succeeds).
-4. Open `feature_list.json` — all tracked features are done.
+3. Run `./init.sh` (expects: 17 test files / 66 tests pass, build succeeds).
+4. Open `feature_list.json` — `feat-026` through `feat-034` are pending Elder Triple Screen roadmap items.
 5. Check this file and `progress.md` for context.
+6. For live Longbridge analysis, run `bash .agents/skills/trade-living-cli/scripts/verify-longbridge-env.sh`; the preflight now validates against the current checkout path.
 
 ## Current State
 
-**All tracked features are complete and validated.**
+Tracked implementation through `feat-025` is complete and validated. The feature backlog now includes pending Elder Triple Screen roadmap items `feat-026` through `feat-034`; `feat-026` is the next selected implementation target.
 
 The CLI supports 9 command groups (`init`, `daemon`, `analyze`, `momentum`, `triple`, `force`, `risk`, `portfolio`, `report`), with analysis commands working in both offline (sample data) and live (`--live`) modes.
 
@@ -25,6 +26,26 @@ The official Longbridge Node.js SDK is available through `--data-provider sdk`. 
 Option holdings can be enriched through external delayed quote providers when configured with `--option-quote-provider tradier|marketdata|auto`. Enriched option holdings include `quoteSource` and `quoteDelay`.
 
 The repository now ships a project-local Codex skill at `.agents/skills/trade-living-cli` for safe AI invocation and Longbridge preflight validation.
+
+The repository also ships `.agents/skills/munger-perspective`, copied from GitHub `alchaincyf/munger-skill` under the MIT license. Use it when the user explicitly asks for a Charlie Munger-style view, inversion, incentive analysis, cognitive bias checks, Lollapalooza effects, or mental-model review. For stock analysis, run Trade Living CLI or Longbridge data first, then use the Munger skill as a qualitative overlay.
+
+`analyze` and `report` are now position-aware. They query holdings first and attach an optional `position` field only when the requested symbol matches an existing holding. No matching holding keeps the legacy analysis shape.
+
+Analysis JSON now includes an optional bilingual `interpretation` layer with Chinese conclusion labels, status narratives, warning translations, and translated position notes. Markdown reports also render trade quality as bilingual status text and translate position-management notes.
+
+Live analysis defaults to a one-year lookback from runtime when `--start` is omitted. `analyze`, `report`, `momentum`, and `triple` now use real daily/weekly/monthly K-lines for Triple Screen analysis; reports include dedicated Triple Screen status and RR analysis sections.
+
+The latest technical-plan review compared the current implementation against Alexander Elder's Triple Screen requirements. Current coverage includes real daily/weekly/monthly K-lines, Chinese Triple Screen/RR reporting, Force Index/RSI/MACD/ATR primitives, 2% sizing support, and position-aware reports. The remaining gaps are now explicit pending features:
+
+- `feat-026` Five-factor timeframe lattice.
+- `feat-027` Elder Impulse market tide filter using EMA26 slope plus MACD histogram slope.
+- `feat-028` Intermediate wave pullback filter.
+- `feat-029` Average EMA Penetration entry planner.
+- `feat-030` 2%/6% risk control gates.
+- `feat-031` Exit strategy planner.
+- `feat-032` MACD divergence scanner with A/B alerts.
+- `feat-033` Elder trade sheet and 7/10 score gate.
+- `feat-034` Impulse visualization and conditional formatting.
 
 `trade-living init` supports interactive first-run setup for Longbridge, Telegram, model provider, daemon logging, and config writing. Analysis output can be explicitly sent to Telegram with `--notify-channel telegram`.
 
@@ -210,9 +231,9 @@ All 6 CLI commands tested against authenticated Longbridge Terminal:
 
 Priority order:
 
-1. **Credential rotation** — Rotate any npm or Telegram tokens that were pasted into chat, then store active tokens in environment variables or GitHub Secrets only.
-2. **Real init run** — Run `trade-living init` in a TTY for step-by-step setup after `TELEGRAM_BOT_TOKEN` is exported, then inspect `.trade-living/config.json`.
-3. **Telegram notification smoke** — With `TELEGRAM_BOT_TOKEN` and chat id configured, run `trade-living --notify-channel telegram --markdown analyze AAPL.US` and confirm the report arrives.
-4. **Daemon runtime smoke** — Start a short-interval daemon in a controlled shell, inspect the log file, then stop it with `trade-living daemon stop`.
-5. **Published package smoke** — Install or run `trade-living-cli@0.1.2` from npm and verify `trade-living --help`.
+1. **Implement `feat-026`** — Make the Triple Screen five-factor timeframe lattice explicit, including intermediate/long/short resolution and provider capability handling.
+2. **Implement `feat-027`** — Replace the current trend shortcut with Elder Impulse EMA26 slope plus MACD histogram slope states.
+3. **Continue Elder roadmap** — Work through `feat-028` to `feat-034` in order, keeping all functionality advisory and non-executing.
+4. **Credential rotation** — Rotate any npm or Telegram tokens that were pasted into chat, then store active tokens in environment variables or GitHub Secrets only.
+5. **Telegram notification smoke** — With `TELEGRAM_BOT_TOKEN` and chat id configured, run `trade-living --notify-channel telegram --markdown analyze AAPL.US` and confirm the report arrives.
 6. **Option quote enrichment** — Investigate additional free or user-configurable option quote sources for LEAPS/options currently shown as cost-only when no provider token is configured.

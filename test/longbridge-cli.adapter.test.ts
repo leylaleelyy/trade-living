@@ -58,7 +58,7 @@ describe("LongbridgeCliAdapter", () => {
         volume: 980000
       }
     ]);
-    expect(calls).toEqual([["kline", "history", "AAPL.US", "--start", "2024-01-01"]]);
+    expect(calls).toEqual([["kline", "history", "AAPL.US", "--start", "2024-01-01", "--period", "day"]]);
   });
 
   it("fetches and normalizes portfolio holdings", async () => {

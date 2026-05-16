@@ -19,6 +19,7 @@ import { evaluateTripleScreen } from "./systems/triple-screen.system.js";
 import { toJsonReport } from "./report/json.reporter.js";
 import { toMarkdownReport } from "./report/markdown.reporter.js";
 import { enrichOptionHoldings } from "./portfolio/option-enrichment.service.js";
+import { attachPositionContext } from "./portfolio/position-context.service.js";
 import { getDaemonStatus, startDaemon, stopDaemon } from "./runtime/daemon.service.js";
 import {
   buildInitWizardPlan,
@@ -121,8 +122,57 @@ async function getDailyKLines(symbol: string, options: OutputOptions): Promise<K
   });
 }
 
-function getWeeklyKLines(dailyKLines: KLine[]): KLine[] {
-  return dailyKLines.filter((_, index) => index % 5 === 0);
+async function getTripleScreenKLines(
+  symbol: string,
+  options: OutputOptions
+): Promise<{ daily: KLine[]; weekly: KLine[]; monthly: KLine[] }> {
+  const provider = getDataProvider(options);
+  const [daily, weekly, monthly] = await Promise.all([
+    provider.getKLines(symbol, {
+      start: options.start,
+      period: "day"
+    }),
+    provider.getKLines(symbol, {
+      start: options.start,
+      period: "week"
+    }),
+    provider.getKLines(symbol, {
+      start: options.start,
+      period: "month"
+    })
+  ]);
+
+  return { daily, weekly, monthly };
+}
+
+async function analyzeSymbolWithPositionContext(
+  symbol: string,
+  options: OutputOptions
+) {
+  const provider = getDataProvider(options);
+  const holdings = await provider.getEnrichedHoldings();
+  const [dailyKLines, weeklyKLines, monthlyKLines] = await Promise.all([
+    provider.getKLines(symbol, {
+      start: options.start,
+      period: "day"
+    }),
+    provider.getKLines(symbol, {
+      start: options.start,
+      period: "week"
+    }),
+    provider.getKLines(symbol, {
+      start: options.start,
+      period: "month"
+    })
+  ]);
+  const analysis = analyzeKLines(symbol, dailyKLines, weeklyKLines, monthlyKLines);
+  return attachPositionContext(analysis, holdings);
+}
+
+function defaultStartDate(now = new Date()): string {
+  const start = new Date(now);
+  start.setFullYear(start.getFullYear() - 1);
+  return start.toISOString().slice(0, 10);
 }
 
 function parseChannel(value: string): ChannelKind {
@@ -159,7 +209,7 @@ export function createProgram(): Command {
     .option("--notify-channel <channel>", "send command output to channel: none or telegram", parseChannel, "none")
     .option("--telegram-bot-token-env <name>", "environment variable that stores the Telegram bot token")
     .option("--telegram-chat-id <id>", "Telegram chat id")
-    .option("--start <date>", "history start date for live K-line data", "2024-01-01");
+    .option("--start <date>", "history start date for live K-line data", defaultStartDate());
 
   program
     .command("init")
@@ -285,7 +335,7 @@ export function createProgram(): Command {
     .description("Run full Triple Screen, momentum, structure, divergence, and risk analysis")
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
-      const analysis = analyzeKLines(symbol, await getDailyKLines(symbol, options));
+      const analysis = await analyzeSymbolWithPositionContext(symbol, options);
       await printResult(analysis, options, `Analysis ${symbol}`);
     });
 
@@ -295,10 +345,10 @@ export function createProgram(): Command {
     .description("Calculate momentum score")
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
-      const klines = await getDailyKLines(symbol, options);
-      const triple = evaluateTripleScreen(getWeeklyKLines(klines), klines);
+      const klines = await getTripleScreenKLines(symbol, options);
+      const triple = evaluateTripleScreen(klines.weekly, klines.daily, klines.monthly);
       await printResult(
-        { symbol, ...calculateMomentumScore(klines, triple) },
+        { symbol, ...calculateMomentumScore(klines.daily, triple) },
         options,
         `Momentum ${symbol}`
       );
@@ -310,9 +360,9 @@ export function createProgram(): Command {
     .description("Run Triple Screen analysis")
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
-      const klines = await getDailyKLines(symbol, options);
+      const klines = await getTripleScreenKLines(symbol, options);
       await printResult(
-        { symbol, ...evaluateTripleScreen(getWeeklyKLines(klines), klines) },
+        { symbol, ...evaluateTripleScreen(klines.weekly, klines.daily, klines.monthly) },
         options,
         `Triple Screen ${symbol}`
       );
@@ -376,7 +426,7 @@ export function createProgram(): Command {
     .description("Generate analysis report")
     .action(async (symbol: string) => {
       const options = program.opts<OutputOptions>();
-      const analysis = analyzeKLines(symbol, await getDailyKLines(symbol, options));
+      const analysis = await analyzeSymbolWithPositionContext(symbol, options);
       await printResult(
         analysis,
         { ...options, markdown: options.markdown || (!options.json && !options.pretty) },

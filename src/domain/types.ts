@@ -66,11 +66,31 @@ export interface TradeQuality {
   grade: "A+" | "A" | "B" | "C" | "Avoid";
 }
 
+export interface PositionContext {
+  status: "held";
+  holding: Holding;
+  costBasis: number;
+  marketValue?: number;
+  unrealizedPnl?: number;
+  unrealizedPnlPct?: number;
+  portfolioWeightPct?: number;
+  priceVsCostPct?: number;
+  riskToStop?: number;
+  riskToStopPct?: number;
+  notes: string[];
+}
+
 export interface AnalyzeResult {
   symbol: string;
   marketRegime: MarketRegime;
   tripleScreen: {
     decision: "buy_watch" | "sell_watch" | "avoid" | "neutral";
+    trend: "bullish" | "bearish" | "neutral";
+    monthlyTrend: "bullish" | "bearish" | "neutral";
+    weeklyTrend: "bullish" | "bearish" | "neutral";
+    pullback: boolean;
+    trigger: boolean;
+    score: number;
   };
   momentum: {
     score: number;
@@ -91,4 +111,5 @@ export interface AnalyzeResult {
   };
   tradeQuality: TradeQuality;
   warnings: string[];
+  position?: PositionContext;
 }

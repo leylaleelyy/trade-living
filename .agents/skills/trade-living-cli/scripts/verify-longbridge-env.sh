@@ -24,10 +24,10 @@ fail() {
 }
 
 section "Repository"
-if [ "$(pwd)" = "/Users/bytedance/Documents/trade-living" ]; then
-  pass "cwd is /Users/bytedance/Documents/trade-living"
+if [ "$(pwd)" = "$ROOT" ]; then
+  pass "cwd is $ROOT"
 else
-  fail "cwd is $(pwd), expected /Users/bytedance/Documents/trade-living"
+  fail "cwd is $(pwd), expected $ROOT"
 fi
 
 if [ -f "package.json" ] && [ -f "feature_list.json" ]; then

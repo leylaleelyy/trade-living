@@ -167,6 +167,110 @@
       "dependencies": ["feat-012", "feat-016"],
       "status": "done",
       "evidence": "Updated Markdown reports to render English indicators/status labels with Chinese translations, including Market Regime, Triple Screen, RR, MACD, Force Index, P/L, Top allocations, support/resistance level types, quote quality, and known English warnings. Verification on 2026-05-12: npm run check, npm test, npm run build, analyze markdown smoke, and portfolio markdown smoke passed."
+    },
+    {
+      "id": "feat-022",
+      "name": "Munger Perspective Skill Integration",
+      "description": "Reuse the public GitHub alchaincyf/munger-skill as a project-local skill for Charlie Munger-style investment decision review, inversion, incentive analysis, cognitive bias checks, and mental model overlays.",
+      "dependencies": ["feat-014"],
+      "status": "done",
+      "evidence": "Added .agents/skills/munger-perspective from https://github.com/alchaincyf/munger-skill with SKILL.md, MIT LICENSE, references, and examples. Verification on 2026-05-15: skill frontmatter inspected and npm run check passed."
+    },
+    {
+      "id": "feat-023",
+      "name": "Position-Aware Stock Analysis",
+      "description": "Query account holdings before analyze/report commands and add position-aware context when the requested symbol is already held, while keeping normal analysis unchanged for symbols without a matching holding.",
+      "dependencies": ["feat-011", "feat-018"],
+      "status": "done",
+      "evidence": "Added optional AnalyzeResult.position context with matched holding, cost basis, unrealized P/L, portfolio weight, risk-to-stop, notes, Markdown rendering, product docs, and JSON contract coverage. Verification on 2026-05-15: ./init.sh passed, including npm run check, npm test, npm run build; CLI smokes for held/non-held symbols and Markdown report output passed."
+    },
+    {
+      "id": "feat-024",
+      "name": "Bilingual Status And Conclusion Interpretation",
+      "description": "Add Chinese conclusion and status explanations to analysis JSON outputs and ensure human-readable reports include Chinese translations for trade quality and position-management notes.",
+      "dependencies": ["feat-011", "feat-012", "feat-021", "feat-023"],
+      "status": "done",
+      "evidence": "Added optional analyze JSON interpretation with Chinese conclusion, status labels/narratives, warning translations, and position note translations. Markdown reports now render bilingual trade quality labels and translated position notes. Verification on 2026-05-16: npm run check, npm test, npm run build, ./init.sh, and JSON/Markdown CLI smokes passed."
+    },
+    {
+      "id": "feat-025",
+      "name": "Strict Triple Screen Timeframes And RR Report",
+      "description": "Default live analysis history to one year back from the current date, use real weekly and monthly K-lines for strict Triple Screen analysis, and add Chinese timeframe status plus RR analysis to reports.",
+      "dependencies": ["feat-004", "feat-011", "feat-012", "feat-021"],
+      "status": "done",
+      "evidence": "Analyze/report/triple now fetch real day/week/month K-lines; Triple Screen requires monthly and weekly trend confirmation and exposes monthlyTrend/weeklyTrend/pullback/trigger/score. Default --start is dynamically one year before runtime. Markdown reports include 三重滤网状态 and RR 分析 sections; JSON interpretation includes monthly/weekly/RR Chinese explanations. Verification on 2026-05-16: npm run check, npm test, focused systems/contract/Markdown/Longbridge adapter tests, npm run build, offline JSON/Markdown/triple smokes, and live AAPL analyze smoke passed."
+    },
+    {
+      "id": "feat-026",
+      "name": "Triple Screen Five-Factor Timeframe Lattice",
+      "description": "Model Elder's five-factor timeframe rule explicitly: user-selected intermediate timeframe, long timeframe equal to roughly five times intermediate, and short timeframe equal to roughly one fifth intermediate. Expose the resolved lattice in analyze/triple/report JSON and Markdown, keep live data behind providers, and fail clearly when a provider cannot supply the requested short timeframe.",
+      "dependencies": ["feat-025"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16 from the Elder Triple Screen technical plan: current implementation uses day/week/month for analysis, but does not yet expose a configurable intermediate/long/short timeframe lattice or short-timeframe data requirements."
+    },
+    {
+      "id": "feat-027",
+      "name": "Elder Impulse Market Tide Filter",
+      "description": "Replace the current long-timeframe trend shortcut with an explicit Elder Impulse tide filter using EMA26 slope and MACD histogram slope. Return green/red/blue states with Chinese labels, allowed actions, and deterministic tests for bullish, bearish, and conflicting indicator directions.",
+      "dependencies": ["feat-026", "feat-003", "feat-004"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: current Triple Screen trend uses MACD histogram sign plus Force Index EMA13 sign; the Elder plan calls for EMA slope plus MACD histogram slope and explicit green/red/blue action constraints."
+    },
+    {
+      "id": "feat-028",
+      "name": "Intermediate Wave Pullback Filter",
+      "description": "Formalize the second Triple Screen filter on the intermediate timeframe. Detect counter-trend wave opportunities with Force Index EMA2, RSI, and optional stochastic oversold/overbought rules; output pullback quality, rejected reasons, and Chinese explanations without creating trade orders.",
+      "dependencies": ["feat-027", "feat-003", "feat-025"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: current implementation checks daily RSI and Force Index EMA2, but the wave filter is not yet a first-class module with configurable oscillator rules and detailed rejection reasons."
+    },
+    {
+      "id": "feat-029",
+      "name": "Average EMA Penetration Entry Planner",
+      "description": "Add advisory entry planning for Elder's Average EMA Penetration method: estimate tomorrow's EMA13, calculate the average 13EMA penetration depth over the recent 4-6 week window, and produce long/short entry zones plus the prior-high/prior-low trailing stop alternative. This must remain plan-only and must not place orders.",
+      "dependencies": ["feat-028", "feat-003", "feat-011"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: existing tradePlan.entryZone is a simple +/-1% band around latest close; it does not implement EMA13 projection, average penetration depth, or trailing stop entry technique."
+    },
+    {
+      "id": "feat-030",
+      "name": "Risk Control Gates Two And Six Percent",
+      "description": "Extend risk planning with Elder's risk control gates: single-trade risk capped at 2% of equity and aggregate open-position risk capped at 6% of equity. Use current holdings and stop estimates where available, return block/reduce/watch states, and keep behavior advisory only.",
+      "dependencies": ["feat-006", "feat-023", "feat-029"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: position sizing supports a 2% input default, but analysis does not yet enforce or report a portfolio-level 6% open-risk gate before recommending new exposure."
+    },
+    {
+      "id": "feat-031",
+      "name": "Triple Screen Exit Strategy Planner",
+      "description": "Add exit-planning logic for existing positions: fast impulse-color exits when the intermediate timeframe changes color, conservative channel or auto-envelope targets, and ATR +2/+3 partial-exit levels. Reports should explain hold/reduce/exit rationale in Chinese.",
+      "dependencies": ["feat-027", "feat-030", "feat-023"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: current reports provide targets, stops, RR, and position notes, but do not yet model Elder's impulse-color exit or auto-envelope/channel exit styles."
+    },
+    {
+      "id": "feat-032",
+      "name": "MACD Divergence Scanner A-B Alerts",
+      "description": "Develop a semi-automatic scanner for MACD histogram versus price divergence, including early A-bottom and B-top style alert candidates. The scanner should rank opportunities, expose reasons in JSON/Markdown, and remain alert-only.",
+      "dependencies": ["feat-005", "feat-011", "feat-020"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: divergence primitives exist and analysis reports MACD/Force divergence, but there is no scanner or A/B-pattern alert workflow across symbols."
+    },
+    {
+      "id": "feat-033",
+      "name": "Elder Trade Sheet And Seven-Point Score Gate",
+      "description": "Generate a structured trade sheet before any proposed trade plan, including symbol, direction, entry, stop, targets, RR, timeframe states, risk gates, and an Elder-style 0-10 score. Plans scoring below 7 should be marked as do-not-act in reports and JSON.",
+      "dependencies": ["feat-029", "feat-030", "feat-031"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: current tradeQuality uses a 0-100 grade system; it does not yet produce an Elder-style trade sheet or a 7/10 minimum action gate."
+    },
+    {
+      "id": "feat-034",
+      "name": "Impulse Visualization And Conditional Formatting",
+      "description": "Add report/UI-ready conditional formatting for Elder Impulse colors across resolved timeframes. JSON should expose color states, Markdown should render bilingual color legends, and any future UI can consume the same fields without recalculating indicator state.",
+      "dependencies": ["feat-027", "feat-011", "feat-012"],
+      "status": "pending",
+      "evidence": "Gap identified on 2026-05-16: current Markdown has badges and Chinese labels, but does not expose reusable per-bar or per-timeframe impulse color states for UI visualization."
     }
   ]
 }
